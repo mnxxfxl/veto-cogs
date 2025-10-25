@@ -1,5 +1,5 @@
 work = [
-    "You work in the mines for {amount}.",
+    "You work in the mines for {amount} .",
     "You cut down a tree for {amount}.",
     "You drive women to the store for {amount}.",
     "You work as a software developer and earn {amount}",
