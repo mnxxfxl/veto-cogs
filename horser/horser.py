@@ -60,16 +60,6 @@ class Horser(commands.Cog):
             'races_won INTEGER NOT NULL DEFAULT 0'
             ');'
         )
-        self.cursor.execute(
-            'CREATE TABLE IF NOT EXISTS user_data ('
-            'guild_id INTEGER NOT NULL,'
-            'user_id INTEGER NOT NULL,'
-            
-            'stable_type TEXT,'
-
-            'PRIMARY KEY (guild_id, user_id)'
-            ');'
-        )
 
     async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int) -> None:
         # TODO: Replace this with the proper end user data removal handling.
@@ -159,16 +149,6 @@ class Horser(commands.Cog):
     async def horser(self, ctx: commands.Context, cmd: str | None = None, *args) -> None:
         """Horser main menu."""
 
-        # create user_data entry if doesn't exist
-        self.cursor.execute(
-            "INSERT INTO user_data (guild_id, user_id) VALUES (?, ?) ON CONFLICT (guild_id, user_id) DO NOTHING;",
-            (ctx.guild.id, ctx.author.id)
-        )
-        self.cursor.execute(
-            "UPDATE user_data SET stable_type = 'basic' WHERE guild_id = ? AND user_id = ?;",
-            (ctx.guild.id, ctx.author.id)
-        )
-
         if not cmd:
             await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu(self, ctx))
         elif cmd.lower() == "buyhorse":
@@ -234,13 +214,8 @@ f"""Welcome to Horser! The horse racing simulation game.
                 (ctx.guild.id, ctx.author.id),
             ))[0][0]
 
-            stable_type = list(self.cursor.execute(
-                "SELECT stable_type FROM user_data WHERE guild_id = ? AND user_id = ?;",
-                (ctx.guild.id, ctx.author.id),
-            ))[0][0]
-
             embed.add_field(name="", value=
-f"""You currently have {horse_count} horses in your stable. Your {stable_type} stable can hold up to {1} horse.
+f"""You currently have {horse_count} horses in your stable.
 
 Stable currently under construction.""")
             
