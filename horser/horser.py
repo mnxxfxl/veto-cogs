@@ -224,8 +224,8 @@ f"""Welcome to Horser! The horse racing simulation game.
             ):
                 # add embed which shows the horse emoji with the corresponding color
                 emoji = await self.config.__getattr__(f'emoji_horse_{horse[1]}')()
-                embed.add_field(name="", value=f"{emoji}", inline=True)
-                embed.add_field(name=horse[0], value=f"Color: {horse[1]}", inline=False)
+                embed.add_field(name=emoji, value=horse[0], inline=False)
+                embed.add_field(name="", value=f"Color: {horse[1]}", inline=False)
 
         elif code == "store_menu":
             embed.color = discord.Color.dark_green()
