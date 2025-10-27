@@ -215,17 +215,20 @@ f"""Welcome to Horser! The horse racing simulation game.
             ))[0][0]
 
             embed.add_field(name="", value=
-            f"""You currently have {horse_count} horses in your stable."""
+            f"You currently have {horse_count} horses in your stable."
+            "*To manage your horse, type !horser manage [horse name] or use the select menu below.*"
             )
             
+            horse_idx = 1
             for horse in self.cursor.execute(
-                "SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;",
+                "SELECT horse_name, horse_color, energy, max_energy FROM horses WHERE guild_id = ? AND user_id = ?;",
                 (ctx.guild.id, ctx.author.id),
             ):
                 # add embed which shows the horse emoji with the corresponding color
                 emoji = await self.config.__getattr__(f'emoji_horse_{horse[1]}')()
-                embed.add_field(name=emoji, value=horse[0], inline=False)
-                embed.add_field(name="", value=f"Color: {horse[1]}", inline=False)
+                embed.add_field(name=f"{horse_idx}. {horse[0]}", value=emoji, inline=False)
+                embed.add_field(name="", value=f"Energy: {horse[2]}/{horse[3]}", inline=False)
+                horse_idx += 1
 
         elif code == "store_menu":
             embed.color = discord.Color.dark_green()
