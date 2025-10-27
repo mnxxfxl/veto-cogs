@@ -215,9 +215,8 @@ f"""Welcome to Horser! The horse racing simulation game.
             ))[0][0]
 
             embed.add_field(name="", value=
-f"""You currently have {horse_count} horses in your stable.
-
-Stable currently under construction.""")
+            f"""You currently have {horse_count} horses in your stable."""
+            )
             
             for horse in self.cursor.execute(
                 "SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;",
@@ -225,7 +224,7 @@ Stable currently under construction.""")
             ):
                 # add embed which shows the horse emoji with the corresponding color
                 emoji = await self.config.__getattr__(f'emoji_horse_{horse[1]}')()
-                embed.add_field(name="", value=f"{emoji}", inline=False)
+                embed.add_field(name="", value=f"{emoji}", inline=True)
                 embed.add_field(name=horse[0], value=f"Color: {horse[1]}", inline=False)
 
         elif code == "store_menu":
