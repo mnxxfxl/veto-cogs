@@ -93,7 +93,7 @@ class Horser(commands.Cog):
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
 
-        await ctx.send(embed=await self.get_embed(self, ctx, "main_menu"), view=self.MainMenu())
+        await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu())
 
     async def get_embed(self, ctx: commands.Context, code: str) -> discord.Embed:
         currency_name = await bank.get_currency_name(self.channel.guild)
