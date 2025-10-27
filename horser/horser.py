@@ -72,12 +72,29 @@ class Horser(commands.Cog):
             if emoji:
                 await self.config.__getattr__("emoji_" + emoji_name).set(str(emoji))
 
+    class MainMenu(discord.ui.View):
+        def __init__(self) -> None:
+            super().__init__(timeout=None)
+
+        @discord.ui.button(label="Stable", style=discord.ButtonStyle.secondary)
+        async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message("Stable menu is under construction.")
+
+        @discord.ui.button(label="Store", style=discord.ButtonStyle.secondary)
+        async def store_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message("Store menu is under construction.")
+        
+        @discord.ui.button(label="Race!", style=discord.ButtonStyle.primary)
+        async def race_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message("Race menu is under construction.")
+
+
     @commands.command()
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
+
         await ctx.send(
             f"""Welcome to Horser! This is where the horse-racing simulation game will be implemented\n.
-            \n
             {await ctx.author.mention}, you have 0 horses in your [Basic] stable.
-        """)
-        await ctx.send(f"{await self.config.emoji_horse_aqua()} represents the aqua horse!")
+            {await self.config.emoji_horse_aqua()} represents the aqua horse!
+        """, view=self.MainMenu())
