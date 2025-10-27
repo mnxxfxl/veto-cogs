@@ -1,18 +1,25 @@
 from typing import Literal
 
 import discord
+from discord.ext import tasks
+
 from redbot.core import bank, commands
 from redbot.core.bot import Red
 from redbot.core.config import Config
-from redbot.core.data_manager import bundled_data_path
+from redbot.core.data_manager import bundled_data_path, cog_data_path
 from redbot.core.utils.menus import menu
 from redbot.core.utils.chat_formatting import humanize_number
 
 import aiofiles
+import apsw
 
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 
 MAX_APP_EMOJIS = 2000
+
+# Energy regen constants
+TICK_SECONDS = 300  # 5 minutes
+REGEN_PER_TICK = 1  # 1 energy per tick
 
 class Horser(commands.Cog):
     """
@@ -51,6 +58,33 @@ class Horser(commands.Cog):
         }
 
         self.config.register_global(**emojis_config)
+
+        # SQLite DB setup
+        self._connection = apsw.Connection(str(cog_data_path(self) / "horser.db"))
+        self.cursor = self._connection.cursor()
+        self.cursor.execute(
+            'CREATE TABLE IF NOT EXISTS horses ('
+            'guild_id INTEGER,'
+            'user_id INTEGER,'
+            'horse_id INTEGER NOT NULL AUTOINCREMENT,'
+
+            'horse_name TEXT,'
+            'horse_color TEXT NOT NULL,'
+
+            'speed INTEGER NOT NULL DEFAULT 1,'
+            'power INTEGER NOT NULL DEFAULT 1,'
+            'stamina INTEGER NOT NULL DEFAULT 1,'
+            'guts INTEGER NOT NULL DEFAULT 1,'
+            'wit INTEGER NOT NULL DEFAULT 1,'
+
+            'energy INTEGER NOT NULL DEFAULT 10,'
+            'max_energy INTEGER NOT NULL DEFAULT 10,'
+            "last_energy_regen_ts INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
+
+            'races_run INTEGER NOT NULL DEFAULT 0,'
+            'races_won INTEGER NOT NULL DEFAULT 0'
+            ');'
+        )
 
     async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int) -> None:
         # TODO: Replace this with the proper end user data removal handling.
@@ -175,3 +209,34 @@ Race currently under construction.""")
 
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
+    
+    ### Energy regeneration logic ###
+    def update_energy(self) -> None:
+        self.cursor.execute(
+            """
+            UPDATE horses
+            SET
+                energy = MIN(
+                max_energy,
+                energy + CAST((strftime('%s','now') - last_regen_ts) / ? AS INTEGER) * ?
+                ),
+                last_regen_ts = last_regen_ts + (
+                CAST((strftime('%s','now') - last_regen_ts) / ? AS INTEGER) * ?
+                )
+            WHERE energy < max_energy;
+            """,
+            (TICK_SECONDS, REGEN_PER_TICK, TICK_SECONDS, TICK_SECONDS),
+        )
+
+    @tasks.loop(seconds=60)
+    async def energy_catchup(self):
+        # Downtime-proof: does nothing unless a full 5-min tick elapsed
+        try:
+            self.bring_energy_current(None)
+        except Exception as e:
+            print(f"[energy_catchup] DB error: {e}")
+
+    @energy_catchup.before_loop
+    async def _before_loop(self):
+        await self.bot.wait_until_ready()
+    ### End energy regeneration logic ###
