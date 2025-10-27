@@ -142,7 +142,7 @@ class Horser(commands.Cog):
             self.horser = horser
             self.ctx = ctx
 
-        @discord.ui.button(label="Buy Horse", style=discord.ButtonStyle.secondary)
+        @discord.ui.button(label="Buy Horse", style=discord.ButtonStyle.primary)
         async def buy_horse_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "store_menu_buy_horse"), view=self.horser.StoreMenuBuyHorse(self.horser, self.ctx))
 
@@ -188,9 +188,7 @@ class Horser(commands.Cog):
             embed.add_field(name="", value=
 f"""Welcome to Horser! The horse racing simulation game.
 
-{ctx.author.mention}, you have {0} horses in your stable.
-
-{await self.config.emoji_horse_aqua()} represents the aqua horse!""")
+{ctx.author.mention}, you have {0} horses in your stable.""")
 
         elif code == "stable_menu":
             embed.color = discord.Color.dark_gold()
@@ -224,8 +222,16 @@ Store currently under construction.""")
             embed.add_field(name="", value= 
 f""" Your current balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}.
 
-To buy a horse, type !horser buy_horse [color] [name].""")
-            
+To buy a horse, type !horser buy_horse [color] [name].
+
+There are currently 20 colors available. Hover over each horse emoji below to see its color name.
+
+{await self.config.emoji_horse_aqua()} {await self.config.emoji_horse_ash()} {await self.config.emoji_horse_black()} {await self.config.emoji_horse_blue()}
+{await self.config.emoji_horse_brown()} {await self.config.emoji_horse_chocolate()} {await self.config.emoji_horse_cream()} {await self.config.emoji_horse_diamond()} 
+{await self.config.emoji_horse_green()} {await self.config.emoji_horse_grey()} {await self.config.emoji_horse_lime()} {await self.config.emoji_horse_orange()} 
+{await self.config.emoji_horse_pink()} {await self.config.emoji_horse_purple()} {await self.config.emoji_horse_red()} {await self.config.emoji_horse_sky()}
+{await self.config.emoji_horse_soot()} {await self.config.emoji_horse_white()} {await self.config.emoji_horse_yellow()} {await self.config.emoji_horse_zombie()}""")
+
         elif code == "race_menu":
             embed.color = discord.Color.green()
             embed.title = "Race!"
