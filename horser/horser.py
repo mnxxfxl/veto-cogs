@@ -93,7 +93,7 @@ class Horser(commands.Cog):
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
 
-        embed = discord.Embed(
+        embed = discord.Embed(description=
 f"""Welcome to Horser! The horse racing simulation game.
 {ctx.author.mention}, you have 0 horses in your [Basic] stable.
 {await self.config.emoji_horse_aqua()} represents the aqua horse!""")
