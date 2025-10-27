@@ -77,6 +77,6 @@ class Horser(commands.Cog):
         await ctx.send(
             f"""Welcome to Horser! This is where the horse-racing simulation game will be implemented\n.
             \n
-            {await ctx.author.mention}, you have 0 horses in your [Basic] stable.
+            {ctx.author.mention}, you have 0 horses in your [Basic] stable.
         """)
         await ctx.send(f"{await self.config.emoji_horse_aqua()} represents the aqua horse!")
