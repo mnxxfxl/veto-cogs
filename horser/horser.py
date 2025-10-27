@@ -142,9 +142,23 @@ class Horser(commands.Cog):
             self.horser = horser
             self.ctx = ctx
 
+        @discord.ui.button(label="Buy Horse", style=discord.ButtonStyle.secondary)
+        async def buy_horse_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "store_menu_buy_horse"), view=self.horser.StoreMenuBuyHorse(self.horser, self.ctx))
+
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "main_menu"), view=self.horser.MainMenu(self.horser, self.ctx))
+
+    class StoreMenuBuyHorse(discord.ui.View):
+        def __init__(self, horser, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.horser = horser
+            self.ctx = ctx
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "store"), view=self.horser.StoreMenu(self.horser, self.ctx))
 
     class RaceMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
@@ -202,6 +216,15 @@ f""" Here you can buy horses and training equipment.
 Your current balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}.
 
 Store currently under construction.""")
+            
+        elif code == "store_menu_buy_horse":
+            embed.color = discord.Color.dark_green()
+            embed.title = "Buy Horse"
+
+            embed.add_field(name="", value= 
+f""" Your current balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}.
+
+To buy a horse, type !horser buy_horse [color] [name].""")
             
         elif code == "race_menu":
             embed.color = discord.Color.green()
