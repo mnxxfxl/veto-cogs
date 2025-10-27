@@ -9,7 +9,7 @@ from redbot.core.utils.menus import menu
 
 import aiofiles
 
-from horser import embeds as embeds
+from horser.embeds import main_menu
 
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 
@@ -95,4 +95,4 @@ class Horser(commands.Cog):
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
 
-        await ctx.send(embed=await embeds.main_menu(self, ctx), view=self.MainMenu())
+        await ctx.send(embed=await main_menu(self, ctx), view=self.MainMenu())
