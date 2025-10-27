@@ -171,10 +171,45 @@ class Horser(commands.Cog):
             await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "main_menu"), view=self.horser.MainMenu(self.horser, self.ctx))
 
     @commands.command()
-    async def horser(self, ctx: commands.Context) -> None:
+    async def horser(self, ctx: commands.Context, cmd: str | None = None, *args) -> None:
         """Horser main menu."""
 
-        await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu(self, ctx))
+        if not cmd:
+            await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu(self, ctx))
+        elif cmd.lower() == "buyhorse":
+            # Buy horse command
+            if len(args) < 2:
+                await ctx.send("Usage: !horser buy_horse [color] [name]")
+                return
+
+            color = args[0].lower()
+            name = " ".join(arg.capitalize() for arg in args[1:])
+
+            # Check if color is valid
+            valid_colors = [
+                "aqua", "ash", "black", "blue", "brown", "chocolate", "cream",
+                "diamond", "green", "grey", "lime", "orange", "pink", "purple",
+                "red", "sky", "soot", "white", "yellow", "zombie"
+            ]
+            if color not in valid_colors:
+                await ctx.send(f"Invalid color. Valid colors are: {', '.join(valid_colors)}")
+                return
+
+            # Check if user has enough balance
+            currency_name = await bank.get_currency_name(ctx.guild)
+            horse_cost = 25000
+            user_balance = await bank.get_balance(ctx.author)
+            if user_balance < horse_cost:
+                await ctx.send(f"You do not have enough {currency_name} to buy a horse. You need {humanize_number(horse_cost)} {currency_name}.")
+                return
+
+            # Deduct cost and add horse to database
+            await bank.withdraw_credits(ctx.author, horse_cost)
+            self.cursor.execute(
+                "INSERT INTO horses (guild_id, user_id, horse_name, horse_color) VALUES (?, ?, ?, ?);",
+                (ctx.guild.id, ctx.author.id, name, color)
+            )
+            await ctx.send(f"You have successfully bought a {color} horse named '{name}' for {humanize_number(horse_cost)} {currency_name}!")
 
     async def get_embed(self, ctx: commands.Context, code: str) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
@@ -222,7 +257,7 @@ Store currently under construction.""")
             embed.add_field(name="", value= 
 f""" Your current balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}.
 
-To buy a horse, type !horser buy_horse [color] [name].
+To buy a horse, type !horser buyHorse [color] [name]. A horse costs {25000} {currency_name}.
 
 There are currently 20 colors available. Hover over each horse emoji below to see its color name.
 
