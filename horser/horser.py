@@ -182,8 +182,13 @@ f"""Welcome to Horser! The horse racing simulation game.
             embed.color = discord.Color.dark_gold()
             embed.title = "Stable"
 
+            horse_count = list(self.cursor.execute(
+                "SELECT COUNT(*) FROM horses WHERE guild_id = ? AND user_id = ?;",
+                (ctx.guild.id, ctx.author.id),
+            ))[0][0]
+
             embed.add_field(name="", value=
-f"""You currently have {0} horses in your stable. Your {"basic"} stable can hold up to {1} horses.
+f"""You currently have {horse_count} horses in your stable. Your {"basic"} stable can hold up to {1} horse.
 
 Stable currently under construction.""")
 
