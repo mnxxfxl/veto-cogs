@@ -171,7 +171,7 @@ Store currently under construction.""")
             embed.title = "Race!"
 
             embed.add_field(name="", value=
-f""" Race your precious races for glory and cash prizes!
+f""" Race your horses for cash!
 
 Race currently under construction.""")
 
