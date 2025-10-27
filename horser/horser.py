@@ -64,9 +64,9 @@ class Horser(commands.Cog):
             'CREATE TABLE IF NOT EXISTS user_data ('
             'guild_id INTEGER,'
             'user_id INTEGER,'
-            'PRIMARY KEY (guild_id, user_id)'
+            'PRIMARY KEY (guild_id, user_id),'
             
-            'stable_type TEXT NOT NULL DEFAULT "basic"'
+            'stable_type TEXT DEFAULT "basic"'
             ');'
         )
 
