@@ -1,15 +1,13 @@
 from typing import Literal
 
 import discord
-from redbot.core import commands
+from redbot.core import bank, commands
 from redbot.core.bot import Red
 from redbot.core.config import Config
 from redbot.core.data_manager import bundled_data_path
 from redbot.core.utils.menus import menu
 
 import aiofiles
-
-from horser.embeds import main_menu
 
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 
@@ -95,4 +93,20 @@ class Horser(commands.Cog):
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
 
-        await ctx.send(embed=await main_menu(self, ctx), view=self.MainMenu())
+        await ctx.send(embed=await self.get_embed(self, ctx, "main_menu"), view=self.MainMenu())
+
+    async def get_embed(self, ctx: commands.Context, code: str) -> discord.Embed:
+        currency_name = await bank.get_currency_name(self.channel.guild)
+        embed = discord.Embed()
+
+        if code == "main_menu":
+            embed.color = discord.Color.dark_magenta()
+            embed.title = "Horser"
+
+            embed.add_field(value=
+f"""Welcome to Horser! The horse racing simulation game.
+{ctx.author.mention}, you have 0 horses in your [Basic] stable.
+{await self.config.emoji_horse_aqua()} represents the aqua horse!""")
+
+        embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
+        return embed
