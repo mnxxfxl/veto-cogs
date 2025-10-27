@@ -73,54 +73,59 @@ class Horser(commands.Cog):
                 await self.config.__getattr__("emoji_" + emoji_name).set(str(emoji))
 
     class MainMenu(discord.ui.View):
-        def __init__(self, ctx: commands.Context) -> None:
+        def __init__(self, horser, ctx: commands.Context) -> None:
             super().__init__(timeout=None)
+            self.horser = horser
             self.ctx = ctx
+           
 
         @discord.ui.button(label="Stable", style=discord.ButtonStyle.secondary)
         async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "stable_menu"), view=self.StableMenu(self.ctx))
+            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "stable_menu"), view=self.StableMenu(self.horser, self.ctx))
 
         @discord.ui.button(label="Store", style=discord.ButtonStyle.secondary)
         async def store_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "store_menu"), view=self.StoreMenu(self.ctx))
+            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "store_menu"), view=self.StoreMenu(self.horser, self.ctx))
 
         @discord.ui.button(label="Race!", style=discord.ButtonStyle.primary)
         async def race_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "race_menu"), view=self.RaceMenu(self.ctx))
+            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "race_menu"), view=self.RaceMenu(self.horser, self.ctx))
 
     class StableMenu(discord.ui.View):
-        def __init__(self, ctx: commands.Context) -> None:
+        def __init__(self, horser, ctx: commands.Context) -> None:
             super().__init__(timeout=None)
+            self.horser = horser
             self.ctx = ctx
 
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "main_menu"), view=self.MainMenu(self.ctx))
+            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "main_menu"), view=self.MainMenu(self.horser, self.ctx))
 
     class StoreMenu(discord.ui.View):
-        def __init__(self, ctx: commands.Context) -> None:
+        def __init__(self, horser, ctx: commands.Context) -> None:
             super().__init__(timeout=None)
+            self.horser = horser
             self.ctx = ctx
 
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "main_menu"), view=self.MainMenu(self.ctx))
+            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "main_menu"), view=self.MainMenu(self.horser, self.ctx))
 
     class RaceMenu(discord.ui.View):
-        def __init__(self, ctx: commands.Context) -> None:
+        def __init__(self, horser, ctx: commands.Context) -> None:
             super().__init__(timeout=None)
+            self.horser = horser
             self.ctx = ctx
 
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "main_menu"), view=self.MainMenu(self.ctx))
+            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "main_menu"), view=self.MainMenu(self.horser, self.ctx))
 
     @commands.command()
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
 
-        await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu(ctx))
+        await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu(self, ctx))
 
     async def get_embed(self, ctx: commands.Context, code: str) -> discord.Embed:
         if (ctx.guild):
