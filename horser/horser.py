@@ -9,7 +9,7 @@ from redbot.core.utils.menus import menu
 
 import aiofiles
 
-from horser.embeds import *
+from horser import embeds as embeds
 
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 
