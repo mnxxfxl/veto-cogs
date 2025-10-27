@@ -78,15 +78,15 @@ class Horser(commands.Cog):
 
         @discord.ui.button(label="Stable", style=discord.ButtonStyle.secondary)
         async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(content="Stable menu is under construction.")
+            await interaction.response.edit_message(content="Stable menu is under construction.", view=None)
 
         @discord.ui.button(label="Store", style=discord.ButtonStyle.secondary)
         async def store_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(content="Store menu is under construction.")
+            await interaction.response.edit_message(content="Store menu is under construction.", view=None)
 
         @discord.ui.button(label="Race!", style=discord.ButtonStyle.primary)
         async def race_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(content="Race menu is under construction.")
+            await interaction.response.edit_message(content="Race menu is under construction.", view=None)
 
 
     @commands.command()
@@ -94,7 +94,7 @@ class Horser(commands.Cog):
         """Horser main menu."""
 
         await ctx.send(
-        f"""Welcome to Horser! This is where the horse-racing simulation game will be implemented.
-        {ctx.author.mention}, you have 0 horses in your [Basic] stable.
-        {await self.config.emoji_horse_aqua()} represents the aqua horse!
-        """, view=self.MainMenu())
+        f"""Welcome to Horser! The horse racing simulation game.
+    {ctx.author.mention}, you have 0 horses in your [Basic] stable.
+    {await self.config.emoji_horse_aqua()} represents the aqua horse!""",
+        view=self.MainMenu())
