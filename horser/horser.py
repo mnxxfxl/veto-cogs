@@ -96,14 +96,18 @@ class Horser(commands.Cog):
         await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu())
 
     async def get_embed(self, ctx: commands.Context, code: str) -> discord.Embed:
-        currency_name = await bank.get_currency_name(ctx.guild)
+        if (ctx.guild):
+            currency_name = await bank.get_currency_name(ctx.guild)
+        else:
+            currency_name = "credits"
+
         embed = discord.Embed()
 
         if code == "main_menu":
             embed.color = discord.Color.dark_magenta()
             embed.title = "Horser"
 
-            embed.add_field(value=
+            embed.add_field(name="", value=
 f"""Welcome to Horser! The horse racing simulation game.
 {ctx.author.mention}, you have 0 horses in your [Basic] stable.
 {await self.config.emoji_horse_aqua()} represents the aqua horse!""")
