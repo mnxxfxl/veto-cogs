@@ -215,10 +215,15 @@ class Horser(commands.Cog):
             embed.color = discord.Color.dark_magenta()
             embed.title = "Horser"
 
+            horse_count = list(self.cursor.execute(
+                "SELECT COUNT(*) FROM horses WHERE guild_id = ? AND user_id = ?;",
+                (ctx.guild.id, ctx.author.id),
+            ))[0][0]
+
             embed.add_field(name="", value=
 f"""Welcome to Horser! The horse racing simulation game.
 
-{ctx.author.mention}, you have {0} horses in your stable.""")
+{ctx.author.mention}, you have {horse_count} horses in your stable.""")
 
         elif code == "stable_menu":
             embed.color = discord.Color.dark_gold()
@@ -244,7 +249,7 @@ Stable currently under construction.""")
                 (ctx.guild.id, ctx.author.id),
             ):
                 # add embed which shows the horse emoji with the corresponding color
-                embed.add_field(name="", value=f"{await self.config.__getattr__(f'emoji_horse_{horse[1]}')}", inline=True)
+                embed.add_field(name="", value=f"{self.config.__getattr__(f'emoji_horse_{horse[1]}')}", inline=True)
                 embed.add_field(name=horse[0], value=f"Color: {horse[1]}", inline=False)
 
         elif code == "store_menu":
