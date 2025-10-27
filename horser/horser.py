@@ -129,10 +129,7 @@ class Horser(commands.Cog):
         await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu(self, ctx))
 
     async def get_embed(self, ctx: commands.Context, code: str) -> discord.Embed:
-        if (ctx.guild):
-            currency_name = await bank.get_currency_name(ctx.guild)
-        else:
-            currency_name = "credits"
+        currency_name = await bank.get_currency_name(ctx.guild)
 
         embed = discord.Embed()
 
