@@ -34,31 +34,6 @@ class Horser(commands.Cog):
             force_registration=True,
         )
 
-        emojis_config = {
-            "emoji_horse_aqua": "NotSet",
-            "emoji_horse_ash": "NotSet",
-            "emoji_horse_black": "NotSet",
-            "emoji_horse_blue": "NotSet",
-            "emoji_horse_brown": "NotSet",
-            "emoji_horse_chocolate": "NotSet",
-            "emoji_horse_cream": "NotSet",
-            "emoji_horse_diamond": "NotSet",
-            "emoji_horse_green": "NotSet",
-            "emoji_horse_grey": "NotSet",
-            "emoji_horse_lime": "NotSet",
-            "emoji_horse_orange": "NotSet",
-            "emoji_horse_pink": "NotSet",
-            "emoji_horse_purple": "NotSet",
-            "emoji_horse_red": "NotSet",
-            "emoji_horse_sky": "NotSet",
-            "emoji_horse_soot": "NotSet",
-            "emoji_horse_white": "NotSet",
-            "emoji_horse_yellow": "NotSet",
-            "emoji_horse_zombie": "NotSet",
-        }
-
-        self.config.register_global(**emojis_config)
-
         # SQLite DB setup
         self._connection = apsw.Connection(str(cog_data_path(self) / "horser.db"))
         self.cursor = self._connection.cursor()
@@ -262,6 +237,14 @@ f"""Welcome to Horser! The horse racing simulation game.
 f"""You currently have {horse_count} horses in your stable. Your {stable_type} stable can hold up to {1} horse.
 
 Stable currently under construction.""")
+            
+            for horse in self.cursor.execute(
+                "SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;",
+                (ctx.guild.id, ctx.author.id),
+            ):
+                # add embed which shows the horse emoji with the corresponding color
+                embed.add_field(name="", value=f"{await self.config.__getattr__(f'emoji_horse_{horse[1]}')}", inline=True)
+                embed.add_field(name=horse[0], value=f"Color: {horse[1]}", inline=False)
 
         elif code == "store_menu":
             embed.color = discord.Color.dark_green()
