@@ -25,6 +25,31 @@ class Horser(commands.Cog):
             force_registration=True,
         )
 
+        emojis_config = {
+            "emoji_horse_aqua": "NotSet",
+            "emoji_horse_ash": "NotSet",
+            "emoji_horse_black": "NotSet",
+            "emoji_horse_blue": "NotSet",
+            "emoji_horse_brown": "NotSet",
+            "emoji_horse_chocolate": "NotSet",
+            "emoji_horse_cream": "NotSet",
+            "emoji_horse_diamond": "NotSet",
+            "emoji_horse_green": "NotSet",
+            "emoji_horse_grey": "NotSet",
+            "emoji_horse_lime": "NotSet",
+            "emoji_horse_orange": "NotSet",
+            "emoji_horse_pink": "NotSet",
+            "emoji_horse_purple": "NotSet",
+            "emoji_horse_red": "NotSet",
+            "emoji_horse_sky": "NotSet",
+            "emoji_horse_soot": "NotSet",
+            "emoji_horse_white": "NotSet",
+            "emoji_horse_yellow": "NotSet",
+            "emoji_horse_zombie": "NotSet",
+        }
+
+        self.config.register_global(**emojis_config)
+
     async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int) -> None:
         # TODO: Replace this with the proper end user data removal handling.
         super().red_delete_data_for_user(requester=requester, user_id=user_id)
@@ -50,5 +75,4 @@ class Horser(commands.Cog):
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
         await ctx.send("Welcome to Horser! This is where the horse-racing simulation game will be implemented.")
-        horse_aqua_emoji = await self.config.emoji_horse_aqua()
-        await ctx.send(f"{horse_aqua_emoji} represents the aqua horse!")
+        await ctx.send(f"{await self.config.emoji_horse_aqua()} represents the aqua horse!")
