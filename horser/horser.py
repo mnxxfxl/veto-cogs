@@ -162,7 +162,7 @@ Stable currently under construction.""")
             embed.add_field(name="", value= 
 f""" Here you can buy horses and training equipment.
 
-Your current balance is {0} {currency_name}.
+Your current balance is {bank.get_balance(ctx.author.id)} {currency_name}.
 
 Store currently under construction.""")
             
