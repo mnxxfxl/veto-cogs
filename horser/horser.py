@@ -75,31 +75,9 @@ class Horser(commands.Cog):
     @commands.command()
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
-
-        menu_msg = f"""Horser, the horse-racing simulation game.\n
-        {ctx.author.mention}, you have 0 horses in your [Basic] stable.\n
-        {await self.config.emoji_horse_aqua()} represents the aqua horse!
-        """
-
-        async def control_stable(*args, **kwargs):
-            return "stable"
-        
-        async def control_store(*args, **kwargs):
-            return "store"
-        
-        async def control_race(*args, **kwargs):
-            return "race"
-
-        controls = {
-            "\N{WHITE HEAVY CHECK MARK}": control_stable,
-            "\N{WHITE HEAVY CHECK MARK}": control_store,
-            "\N{WHITE HEAVY CHECK MARK}": control_race,
-        }
-
-        reply = await menu(ctx, [menu_msg], controls)
-        if reply == "stable":
-            await ctx.send("Stable management is not yet implemented.")
-        elif reply == "store":
-            await ctx.send("Store is not yet implemented.")
-        elif reply == "race":
-            await ctx.send("Racing is not yet implemented.")
+        await ctx.send(
+            f"""Welcome to Horser! This is where the horse-racing simulation game will be implemented\n.
+            \n
+            {await ctx.author.mention}, you have 0 horses in your [Basic] stable.
+        """)
+        await ctx.send(f"{await self.config.emoji_horse_aqua()} represents the aqua horse!")
