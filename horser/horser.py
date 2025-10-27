@@ -73,8 +73,9 @@ class Horser(commands.Cog):
                 await self.config.__getattr__("emoji_" + emoji_name).set(str(emoji))
 
     class MainMenu(discord.ui.View):
-        def __init__(self) -> None:
+        def __init__(self, ctx: commands.Context) -> None:
             super().__init__(timeout=None)
+            self.ctx = ctx
 
         @discord.ui.button(label="Stable", style=discord.ButtonStyle.secondary)
         async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -88,12 +89,29 @@ class Horser(commands.Cog):
         async def race_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             await interaction.response.edit_message(embed=discord.Embed(description="Race menu is under construction."), view=None)
 
+    class StableMenu(discord.ui.View):
+        def __init__(self, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.ctx = ctx
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "main_menu"), view=self.MainMenu(self.ctx))
+
+    class StoreMenu(discord.ui.View):
+        def __init__(self, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.ctx = ctx
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "main_menu"), view=self.MainMenu(self.ctx))
 
     @commands.command()
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
 
-        await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu())
+        await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu(ctx))
 
     async def get_embed(self, ctx: commands.Context, code: str) -> discord.Embed:
         if (ctx.guild):
@@ -109,8 +127,30 @@ class Horser(commands.Cog):
 
             embed.add_field(name="", value=
 f"""Welcome to Horser! The horse racing simulation game.
-{ctx.author.mention}, you have 0 horses in your [Basic] stable.
+
+{ctx.author.mention}, you have {0} horses in your stable.
+
 {await self.config.emoji_horse_aqua()} represents the aqua horse!""")
+
+        elif code == "stable_menu":
+            embed.color = discord.Color.dark_gold()
+            embed.title = "Stable"
+
+            embed.add_field(name="", value=
+f"""You currently have {0} horses in your stable. Your {"basic"} stable can hold up to {1} horses.
+
+Stable currently under construction.""")
+
+        elif code == "store_menu":
+            embed.color = discord.Color.dark_green()
+            embed.title = "Store"
+
+            embed.add_field(name="", value= 
+f""" Here you can buy horses and training equipment.
+
+Your current balance is {0} {currency_name}.
+
+Store currently under construction.""")
 
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
