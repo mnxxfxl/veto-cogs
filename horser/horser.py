@@ -224,7 +224,8 @@ Stable currently under construction.""")
                 (ctx.guild.id, ctx.author.id),
             ):
                 # add embed which shows the horse emoji with the corresponding color
-                embed.add_field(name="", value=f"{self.config.__getattr__(f'emoji_horse_{horse[1]}')}", inline=True)
+                emoji = await self.config.__getattr__(f'emoji_horse_{horse[1]}')
+                embed.add_field(name="", value=f"{emoji}", inline=False)
                 embed.add_field(name=horse[0], value=f"Color: {horse[1]}", inline=False)
 
         elif code == "store_menu":
