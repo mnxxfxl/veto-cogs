@@ -79,15 +79,15 @@ class Horser(commands.Cog):
 
         @discord.ui.button(label="Stable", style=discord.ButtonStyle.secondary)
         async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=discord.Embed(description="Stable menu is under construction."), view=None)
+            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "stable_menu"), view=self.StableMenu(self.ctx))
 
         @discord.ui.button(label="Store", style=discord.ButtonStyle.secondary)
         async def store_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=discord.Embed(description="Store menu is under construction."), view=None)
+            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "store_menu"), view=self.StoreMenu(self.ctx))
 
         @discord.ui.button(label="Race!", style=discord.ButtonStyle.primary)
         async def race_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=discord.Embed(description="Race menu is under construction."), view=None)
+            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "race_menu"), view=self.RaceMenu(self.ctx))
 
     class StableMenu(discord.ui.View):
         def __init__(self, ctx: commands.Context) -> None:
@@ -99,6 +99,15 @@ class Horser(commands.Cog):
             await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "main_menu"), view=self.MainMenu(self.ctx))
 
     class StoreMenu(discord.ui.View):
+        def __init__(self, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.ctx = ctx
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.get_embed(self.ctx, "main_menu"), view=self.MainMenu(self.ctx))
+
+    class RaceMenu(discord.ui.View):
         def __init__(self, ctx: commands.Context) -> None:
             super().__init__(timeout=None)
             self.ctx = ctx
@@ -151,6 +160,15 @@ f""" Here you can buy horses and training equipment.
 Your current balance is {0} {currency_name}.
 
 Store currently under construction.""")
+            
+        elif code == "race_menu":
+            embed.color = discord.Color.green()
+            embed.title = "Race!"
+
+            embed.add_field(name="", value=
+f""" Race your precious races for glory and cash prizes!
+
+Race currently under construction.""")
 
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
