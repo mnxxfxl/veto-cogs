@@ -65,9 +65,9 @@ class Horser(commands.Cog):
             'guild_id INTEGER NOT NULL,'
             'user_id INTEGER NOT NULL,'
             
-            'stable_type TEXT'
+            'stable_type TEXT,'
 
-            'PRIMARY KEY (guild_id, user_id),'
+            'PRIMARY KEY (guild_id, user_id)'
             ');'
         )
 
