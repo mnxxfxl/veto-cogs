@@ -77,8 +77,8 @@ class Horser(commands.Cog):
         """Horser main menu."""
 
         menu_msg = f"""Horser, the horse-racing simulation game.\n
-            {ctx.author.mention}, you have 0 horses in your [Basic] stable.\n
-            {await self.config.emoji_horse_aqua()} represents the aqua horse!
+        {ctx.author.mention}, you have 0 horses in your [Basic] stable.\n
+        {await self.config.emoji_horse_aqua()} represents the aqua horse!
         """
 
         async def control_stable(*args, **kwargs):
@@ -91,9 +91,9 @@ class Horser(commands.Cog):
             return "race"
 
         controls = {
-            "Stable": control_stable,
-            "Store": control_store,
-            "Race": control_race,
+            "\N{WHITE HEAVY CHECK MARK}": control_stable,
+            "\N{WHITE HEAVY CHECK MARK}": control_store,
+            "\N{WHITE HEAVY CHECK MARK}": control_race,
         }
 
         reply = await menu(ctx, [menu_msg], controls)
