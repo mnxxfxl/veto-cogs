@@ -74,5 +74,9 @@ class Horser(commands.Cog):
     @commands.command()
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
-        await ctx.send("Welcome to Horser! This is where the horse-racing simulation game will be implemented.")
+        await ctx.send(
+            f"""Welcome to Horser! This is where the horse-racing simulation game will be implemented\n.
+            \n
+            {await ctx.author.mention}, you have 0 horses in your [Basic] stable.
+        """)
         await ctx.send(f"{await self.config.emoji_horse_aqua()} represents the aqua horse!")
