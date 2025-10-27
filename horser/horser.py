@@ -6,6 +6,7 @@ from redbot.core.bot import Red
 from redbot.core.config import Config
 from redbot.core.data_manager import bundled_data_path
 from redbot.core.utils.menus import menu
+from redbot.core.utils.chat_formatting import humanize_number
 
 import aiofiles
 
@@ -162,7 +163,7 @@ Stable currently under construction.""")
             embed.add_field(name="", value= 
 f""" Here you can buy horses and training equipment.
 
-Your current balance is {bank.get_balance(ctx.author.id)} {currency_name}.
+Your current balance is {humanize_number(await bank.get_balance(ctx.author.id))} {currency_name}.
 
 Store currently under construction.""")
             
