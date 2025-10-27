@@ -66,7 +66,7 @@ class Horser(commands.Cog):
             'CREATE TABLE IF NOT EXISTS horses ('
             'guild_id INTEGER,'
             'user_id INTEGER,'
-            'horse_id INTEGER NOT NULL AUTOINCREMENT,'
+            'horse_id INTEGER PRIMARY KEY AUTOINCREMENT,'
 
             'horse_name TEXT,'
             'horse_color TEXT NOT NULL,'
