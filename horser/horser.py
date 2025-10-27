@@ -9,6 +9,8 @@ from redbot.core.utils.menus import menu
 
 import aiofiles
 
+import embeds
+
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 
 MAX_APP_EMOJIS = 2000
@@ -93,9 +95,4 @@ class Horser(commands.Cog):
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
 
-        embed = discord.Embed(description=
-f"""Welcome to Horser! The horse racing simulation game.
-{ctx.author.mention}, you have 0 horses in your [Basic] stable.
-{await self.config.emoji_horse_aqua()} represents the aqua horse!""")
-
-        await ctx.send(embed=embed, view=self.MainMenu())
+        await ctx.send(embed=await embeds.main_menu(self, ctx), view=self.MainMenu())
