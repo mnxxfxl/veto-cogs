@@ -127,6 +127,7 @@ class Horser(commands.Cog):
     async def cog_unload(self) -> None:
         # This method is called when the cog is unloaded.
         self.energy_catchup.cancel()
+        self._connection.close()
 
     @commands.group()
     async def horser(self, ctx: commands.Context) -> None:
