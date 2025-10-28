@@ -370,18 +370,17 @@ class Horser(commands.Cog):
         await self.bot.wait_until_ready()
     ### End energy regeneration logic ###
 
-    @commands.group(invoke_without_command=True)
+    @commands.group()
     async def horser(self, ctx: commands.Context) -> None:
-        """Horser main menu."""
+        """Horser main group."""
 
         # Update energy before any command
         self.update_energy()
-
-        if ctx.invoked_subcommand is None and ctx.subcommand_passed is None:
-            await ctx.send(embed=await self.get_main_menu_embed(ctx), view=self.MainMenu(self, ctx))
-        elif ctx.invoked_subcommand is None and ctx.subcommand_passed:
-            pass
             
+    @horser.command()
+    async def menu(self, ctx: commands.Context) -> None:
+        """Show the main menu."""
+        await ctx.send(embed=await self.get_main_menu_embed(ctx), view=self.MainMenu(self, ctx))
 
     @horser.command(name="buyHorse", aliases=["buyhorse"])
     async def buyhorse(self, ctx: commands.Context, color: str, *name) -> None:
