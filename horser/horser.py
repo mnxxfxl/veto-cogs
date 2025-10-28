@@ -485,9 +485,8 @@ class Horser(commands.Cog):
 
         for user_id, horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in query:
             currency_name = await bank.get_currency_name(ctx.guild)
-            member = ctx.guild.get_member(user_id)
             emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
-            leaderboard += f"{member.display_name}'s {emoji} **{horse_name}** . . . {speed} | {power} | {stamina} | {guts} | {wit} . . . {currency_name}{humanize_number(cash_earned)} won\n"
+            leaderboard += f"<@\u200b{user_id}>'s {emoji} **{horse_name}** . . . {speed} | {power} | {stamina} | {guts} | {wit} . . . {currency_name}{humanize_number(cash_earned)} won\n"
 
         if len(leaderboard) == 0:
             leaderboard = "No horses found."
