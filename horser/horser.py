@@ -63,6 +63,9 @@ class Horser(commands.Cog):
             ');'
         )
 
+        # Ensure tables updated
+        self.ensure_cash_earned_column()
+
     def ensure_cash_earned_column(self) -> None:
         # Ensure the cash_earned column exists
         columns = [row[1] for row in self.cursor.execute("PRAGMA table_info(horses);")]
@@ -165,9 +168,6 @@ class Horser(commands.Cog):
     @commands.command()
     async def horser(self, ctx: commands.Context, cmd: str | None = None, *args) -> None:
         """Horser main menu."""
-
-        # Ensure tables updated
-        self.ensure_cash_earned_column()
 
         # Update energy before any command
         self.update_energy()
