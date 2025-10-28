@@ -58,7 +58,7 @@ class Horser(commands.Cog):
             "last_energy_regen_ts INTEGER NOT NULL DEFAULT (strftime('%s','now')),"
 
             'races_run INTEGER NOT NULL DEFAULT 0,'
-            'races_won INTEGER NOT NULL DEFAULT 0'
+            'races_won INTEGER NOT NULL DEFAULT 0,'
             'cash_earned INTEGER NOT NULL DEFAULT 0'
             ');'
         )
