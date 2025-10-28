@@ -471,7 +471,7 @@ class Horser(commands.Cog):
             """
         )
 
-        top_horses = ((await self.config.__getattr__(f'emoji_horse_{horse_color}')() + " " + horse_name, speed, power, stamina, guts, wit, cash_earned) 
+        top_horses = ((self.config.__getattr__(f'emoji_horse_{horse_color}') + " " + horse_name, speed, power, stamina, guts, wit, cash_earned) 
                       for horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in top_horses)
         
         return list(top_horses)
