@@ -119,78 +119,6 @@ class Horser(commands.Cog):
         # Ensure tables updated
         self.ensure_cash_earned_column()
 
-    class MainMenu(discord.ui.View):
-        def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
-            self.horser = horser
-            self.ctx = ctx
-
-        @discord.ui.button(label="Stable", style=discord.ButtonStyle.secondary)
-        async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx))
-
-        @discord.ui.button(label="Store", style=discord.ButtonStyle.secondary)
-        async def store_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_store_menu_embed(self.ctx), view=self.horser.StoreMenu(self.horser, self.ctx))
-
-        @discord.ui.button(label="Race!", style=discord.ButtonStyle.primary)
-        async def race_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_race_menu_embed(self.ctx), view=self.horser.RaceMenu(self.horser, self.ctx))
-
-    class StableMenu(discord.ui.View):
-        def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
-            self.horser = horser
-            self.ctx = ctx
-
-        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
-        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
-
-    class ManageHorseMenu(discord.ui.View):
-        def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
-            self.horser = horser
-            self.ctx = ctx
-
-        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
-        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx))
-
-    class StoreMenu(discord.ui.View):
-        def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
-            self.horser = horser
-            self.ctx = ctx
-
-        @discord.ui.button(label="Buy Horse", style=discord.ButtonStyle.primary)
-        async def buy_horse_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_store_menu_buy_horse_embed(self.ctx), view=self.horser.StoreMenuBuyHorse(self.horser, self.ctx))
-
-        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
-        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
-
-    class StoreMenuBuyHorse(discord.ui.View):
-        def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
-            self.horser = horser
-            self.ctx = ctx
-
-        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
-        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_store_menu_embed(self.ctx), view=self.horser.StoreMenu(self.horser, self.ctx))
-
-    class RaceMenu(discord.ui.View):
-        def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
-            self.horser = horser
-            self.ctx = ctx
-
-        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
-        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))    
-
     async def get_main_menu_embed(self, ctx: commands.Context) -> discord.Embed:
         embed = discord.Embed()
         embed.color = discord.Color.dark_magenta()
@@ -208,6 +136,24 @@ class Horser(commands.Cog):
 
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
+    
+    class MainMenu(discord.ui.View):
+        def __init__(self, horser, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.horser = horser
+            self.ctx = ctx
+
+        @discord.ui.button(label="Stable", style=discord.ButtonStyle.secondary)
+        async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx))
+
+        @discord.ui.button(label="Store", style=discord.ButtonStyle.secondary)
+        async def store_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_store_menu_embed(self.ctx), view=self.horser.StoreMenu(self.horser, self.ctx))
+
+        @discord.ui.button(label="Race!", style=discord.ButtonStyle.primary)
+        async def race_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_race_menu_embed(self.ctx), view=self.horser.RaceMenu(self.horser, self.ctx))
     
     async def get_stable_menu_embed(self, ctx: commands.Context) -> discord.Embed:
         embed = discord.Embed()
@@ -238,6 +184,16 @@ class Horser(commands.Cog):
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
     
+    class StableMenu(discord.ui.View):
+        def __init__(self, horser, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.horser = horser
+            self.ctx = ctx
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
+
     async def get_manage_horse_menu_embed(self, ctx: commands.Context, name: str) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
 
@@ -284,6 +240,16 @@ class Horser(commands.Cog):
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
     
+    class ManageHorseMenu(discord.ui.View):
+        def __init__(self, horser, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.horser = horser
+            self.ctx = ctx
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx))
+
     async def get_store_menu_embed(self, ctx: commands.Context) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
 
@@ -300,6 +266,20 @@ class Horser(commands.Cog):
         
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
+
+    class StoreMenu(discord.ui.View):
+        def __init__(self, horser, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.horser = horser
+            self.ctx = ctx
+
+        @discord.ui.button(label="Buy Horse", style=discord.ButtonStyle.primary)
+        async def buy_horse_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_store_menu_buy_horse_embed(self.ctx), view=self.horser.StoreMenuBuyHorse(self.horser, self.ctx))
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
 
     async def get_store_menu_buy_horse_embed(self, ctx: commands.Context) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
@@ -324,6 +304,16 @@ class Horser(commands.Cog):
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
 
+    class StoreMenuBuyHorse(discord.ui.View):
+        def __init__(self, horser, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.horser = horser
+            self.ctx = ctx
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_store_menu_embed(self.ctx), view=self.horser.StoreMenu(self.horser, self.ctx))
+
     async def get_race_menu_embed(self, ctx: commands.Context) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
 
@@ -339,6 +329,16 @@ class Horser(commands.Cog):
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
     
+    class RaceMenu(discord.ui.View):
+        def __init__(self, horser, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.horser = horser
+            self.ctx = ctx
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))    
+
     ### Energy regeneration logic ###
     def update_energy(self) -> None:
         self.cursor.execute(
