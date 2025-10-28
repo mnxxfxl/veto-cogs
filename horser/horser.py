@@ -145,7 +145,8 @@ class Horser(commands.Cog):
         embed.color = discord.Color.dark_magenta()
         embed.title = "Horser"
 
-        horse_count = list(self.cursor.execute(
+        cur = self._connection.cursor()
+        horse_count = list(cur.execute(
             "SELECT COUNT(*) FROM horses WHERE guild_id = ? AND user_id = ?;",
             (ctx.guild.id, ctx.author.id),
         ))[0][0]
@@ -186,7 +187,8 @@ class Horser(commands.Cog):
         embed.color = discord.Color.dark_gold()
         embed.title = "Stable"
 
-        horse_count = list(self.cursor.execute(
+        cur1 = self._connection.cursor()
+        horse_count = list(cur1.execute(
             "SELECT COUNT(*) FROM horses WHERE guild_id = ? AND user_id = ?;",
             (ctx.guild.id, ctx.author.id),
         ))[0][0]
@@ -198,7 +200,8 @@ class Horser(commands.Cog):
         )
         
         horse_idx = 1
-        for horse in self.cursor.execute(
+        cur2 = self._connection.cursor()
+        for horse in cur2.execute(
             "SELECT horse_name, horse_color, energy, max_energy FROM horses WHERE guild_id = ? AND user_id = ?;",
             (ctx.guild.id, ctx.author.id),
         ):
@@ -308,7 +311,8 @@ class Horser(commands.Cog):
         embed.title = "Manage Horse"
 
         # Check if horse exists
-        horse = list(self.cursor.execute(
+        cur = self._connection.cursor()
+        horse = list(cur.execute(
             "SELECT horse_color, energy, max_energy, speed, power, stamina, guts, wit, races_run, races_won, cash_earned FROM horses "
             "WHERE guild_id = ? AND user_id = ? AND horse_name = ?;",
             (ctx.guild.id, ctx.author.id, name)
@@ -387,7 +391,8 @@ class Horser(commands.Cog):
             return
 
         # Deduct cost and add horse to database
-        self.cursor.execute(
+        cur = self._connection.cursor()
+        cur.execute(
             "INSERT INTO horses (guild_id, user_id, horse_name, horse_color) VALUES (?, ?, ?, ?);",
             (ctx.guild.id, ctx.author.id, name, color)
         )
