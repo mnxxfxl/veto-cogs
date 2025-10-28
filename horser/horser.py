@@ -370,7 +370,7 @@ class Horser(commands.Cog):
         await self.bot.wait_until_ready()
     ### End energy regeneration logic ###
 
-    @commands.command()
+    @commands.group(name="horser")
     async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
 
@@ -379,7 +379,7 @@ class Horser(commands.Cog):
 
         await ctx.send(embed=await self.get_main_menu_embed(ctx), view=self.MainMenu(self, ctx))
 
-    @commands.command(name="horser buyHorse", aliases=["horser buyhorse"])
+    @horser.command(name="buyHorse", aliases=["buyhorse"])
     async def horser_buyhorse(self, ctx: commands.Context, color: str, *name) -> None:
         """Buy a horse."""
        
@@ -418,7 +418,7 @@ class Horser(commands.Cog):
             f"Your updated balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}."
             )
 
-    @commands.command(name="horser manage")
+    @horser.command(name="manage")
     async def horser_manage(self, ctx: commands.Context, *name) -> None:
         """Manage a horse."""
         if len(name) < 1:
