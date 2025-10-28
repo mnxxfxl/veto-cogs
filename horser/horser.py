@@ -35,6 +35,32 @@ class Horser(commands.Cog):
             force_registration=True,
         )
 
+        # Emoji setup
+        emojis_config = {
+            "emoji_horse_aqua": "NOT_SET",
+            "emoji_horse_ash": "NOT_SET",
+            "emoji_horse_black": "NOT_SET",
+            "emoji_horse_blue": "NOT_SET",
+            "emoji_horse_brown": "NOT_SET",
+            "emoji_horse_chocolate": "NOT_SET",
+            "emoji_horse_cream": "NOT_SET",
+            "emoji_horse_diamond": "NOT_SET",
+            "emoji_horse_green": "NOT_SET",
+            "emoji_horse_grey": "NOT_SET",
+            "emoji_horse_lime": "NOT_SET",
+            "emoji_horse_orange": "NOT_SET",
+            "emoji_horse_pink": "NOT_SET",
+            "emoji_horse_purple": "NOT_SET",
+            "emoji_horse_red": "NOT_SET",
+            "emoji_horse_sky": "NOT_SET",
+            "emoji_horse_soot": "NOT_SET",
+            "emoji_horse_white": "NOT_SET",
+            "emoji_horse_yellow": "NOT_SET",
+            "emoji_horse_zombie": "NOT_SET",
+        }
+
+        self.config.register_global(**emojis_config)
+
         # SQLite DB setup
         self._connection = apsw.Connection(str(cog_data_path(self) / "horser.db"))
         self.cursor = self._connection.cursor()
