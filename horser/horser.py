@@ -147,13 +147,11 @@ class Horser(commands.Cog):
         async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx))
 
-        @discord.ui.button(label="Store", style=discord.ButtonStyle.secondary)
-        async def store_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_store_menu_embed(self.ctx), view=self.horser.StoreMenu(self.horser, self.ctx))
-
         @discord.ui.button(label="Race!", style=discord.ButtonStyle.primary)
         async def race_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             await interaction.response.edit_message(embed=await self.horser.get_race_menu_embed(self.ctx), view=self.horser.RaceMenu(self.horser, self.ctx))
+
+        # add leaderboards
     
     async def get_stable_menu_embed(self, ctx: commands.Context) -> discord.Embed:
         embed = discord.Embed()
@@ -167,7 +165,8 @@ class Horser(commands.Cog):
 
         embed.add_field(name="", value=
         f"You currently have {horse_count} horses in your stable.\n"
-        "*To manage your horse, type !horser manage [horse name] or use the select menu below.*\n"
+        "\n"
+        "*To manage and improve your horse, type !horser manage [horse name] or use the select menu below.*\n"
         )
         
         horse_idx = 1
@@ -194,7 +193,7 @@ class Horser(commands.Cog):
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
 
-    async def get_manage_horse_menu_embed(self, ctx: commands.Context, name: str) -> discord.Embed:
+    async def get_manage_horse_embed(self, ctx: commands.Context, name: str) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
 
         embed = discord.Embed()
@@ -250,38 +249,7 @@ class Horser(commands.Cog):
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx))
 
-    async def get_store_menu_embed(self, ctx: commands.Context) -> discord.Embed:
-        currency_name = await bank.get_currency_name(ctx.guild)
-
-        embed = discord.Embed()
-        embed.color = discord.Color.dark_green()
-        embed.title = "Store"
-
-        embed.add_field(name="", value= 
-        "Here you can buy horses and training equipment.\n"
-        "\n"
-        f"Your current balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}.\n"
-        "\n"
-        "Store currently under construction.")
-        
-        embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
-        return embed
-
-    class StoreMenu(discord.ui.View):
-        def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=30)
-            self.horser = horser
-            self.ctx = ctx
-
-        @discord.ui.button(label="Buy Horse", style=discord.ButtonStyle.primary)
-        async def buy_horse_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_store_menu_buy_horse_embed(self.ctx), view=self.horser.StoreMenuBuyHorse(self.horser, self.ctx))
-
-        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
-        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
-
-    async def get_store_menu_buy_horse_embed(self, ctx: commands.Context) -> discord.Embed:
+    async def get_buy_horse_embed(self, ctx: commands.Context) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
 
         embed = discord.Embed()
@@ -304,7 +272,7 @@ class Horser(commands.Cog):
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
 
-    class StoreMenuBuyHorse(discord.ui.View):
+    class BuyHorseMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
             super().__init__(timeout=30)
             self.horser = horser
@@ -312,7 +280,7 @@ class Horser(commands.Cog):
 
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_store_menu_embed(self.ctx), view=self.horser.StoreMenu(self.horser, self.ctx))
+            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx))
 
     async def get_race_menu_embed(self, ctx: commands.Context) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
@@ -396,7 +364,7 @@ class Horser(commands.Cog):
 
         name = " ".join(n.capitalize() for n in name)
 
-        await ctx.send(embed=await self.get_manage_horse_menu_embed(ctx, name), view=self.ManageHorseMenu(self, ctx))
+        await ctx.send(embed=await self.get_manage_horse_embed(ctx, name), view=self.ManageHorseMenu(self, ctx))
 
     @horser.command(name="buyHorse", aliases=["buyhorse"])
     async def buyhorse(self, ctx: commands.Context, color: str, *name) -> None:
