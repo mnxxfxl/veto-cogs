@@ -151,6 +151,7 @@ class Horser(commands.Cog):
 
         if not cmd:
             await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu(self, ctx))
+
         elif cmd.lower() == "buyhorse":
             # Buy horse command
             if len(args) < 2:
@@ -185,6 +186,38 @@ class Horser(commands.Cog):
                 (ctx.guild.id, ctx.author.id, name, color)
             )
             await ctx.send(f"You have successfully bought a {color} horse named '{name}' for {humanize_number(horse_cost)} {currency_name}!")
+        
+        elif cmd.lower() == "manage":
+            # Manage horse command
+            if len(args) < 1:
+                await ctx.send("Usage: !horser manage [horse name]")
+                return
+
+            name = " ".join(arg.capitalize() for arg in args)
+
+            # Check if horse exists
+            horse = list(self.cursor.execute(
+                "SELECT horse_color, energy, max_energy, speed, power, stamina, guts, wit, FROM horses WHERE guild_id = ? AND user_id = ? AND horse_name = ?;",
+                (ctx.guild.id, ctx.author.id, name)
+            ))
+            if not horse:
+                await ctx.send(f"You do not have a horse named '{name}' in your stable.")
+                return
+
+            horse_color, energy, max_energy, speed, power, stamina, guts, wit = horse[0]
+            emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
+            await ctx.send(
+                f"Managing Horse: {name}\n"
+                f"Color: {horse_color} {emoji}\n"
+                f"Energy: {energy}/{max_energy}\n"
+
+                f"Speed: {speed}\n"
+                f"Power: {power}\n"
+                f"Stamina: {stamina}\n"
+                f"Guts: {guts}\n"
+                f"Wit: {wit}\n"
+            )
+    
 
     async def get_embed(self, ctx: commands.Context, code: str) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
@@ -215,7 +248,7 @@ f"""Welcome to Horser! The horse racing simulation game.
             ))[0][0]
 
             embed.add_field(name="", value=
-            f"You currently have {horse_count} horses in your stable."
+            f"You currently have {horse_count} horses in your stable.\n"
             "*To manage your horse, type !horser manage [horse name] or use the select menu below.*"
             )
             
