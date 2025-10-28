@@ -203,7 +203,7 @@ class Horser(commands.Cog):
 
         # Check if horse exists
         horse = list(self.cursor.execute(
-            "SELECT horse_color, energy, max_energy, speed, power, stamina, guts, wit, races_run, races_won, cash_earned FROM horses"
+            "SELECT horse_color, energy, max_energy, speed, power, stamina, guts, wit, races_run, races_won, cash_earned FROM horses "
             "WHERE guild_id = ? AND user_id = ? AND horse_name = ?;",
             (ctx.guild.id, ctx.author.id, name)
         ))
