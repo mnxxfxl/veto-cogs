@@ -186,7 +186,9 @@ class Horser(commands.Cog):
 
     async def fetch_user_horses_async(self, ctx) -> List[tuple]:
         cur = self._connection.cursor()
-        return list(cur.execute("SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;", (ctx.guild.id, ctx.author.id)))
+        result = list(cur.execute("SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;", (ctx.guild.id, ctx.author.id)))
+        result = [(row[0], await self.config.__getattr__(f'emoji_horse_{row[1]}')()) for row in result]
+        return result
 
     class StableMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context, user_horses: List[tuple]) -> None:
@@ -216,12 +218,12 @@ class Horser(commands.Cog):
         def _generate_horse_options_from_rows(self, rows: List[tuple]) -> List[discord.SelectOption]:
             options: List[discord.SelectOption] = []
 
-            for horse_name, color in rows:
+            for horse_name, emoji in rows:
                 options.append(
                     discord.SelectOption(
                         label=str(horse_name),
                         value=str(horse_name),
-                        emoji=self.horser.config.emoji_horse_aqua()
+                        emoji=emoji
                     )
                 )
 
