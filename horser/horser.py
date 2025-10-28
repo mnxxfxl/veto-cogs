@@ -189,7 +189,163 @@ class Horser(commands.Cog):
 
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "main_menu"), view=self.horser.MainMenu(self.horser, self.ctx))
+            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "main_menu"), view=self.horser.MainMenu(self.horser, self.ctx))    
+
+    async def get_embed(self, ctx: commands.Context, code: str, *args) -> discord.Embed:
+        currency_name = await bank.get_currency_name(ctx.guild)
+
+        embed = discord.Embed()
+
+        if code == "main_menu":
+            embed.color = discord.Color.dark_magenta()
+            embed.title = "Horser"
+
+            horse_count = list(self.cursor.execute(
+                "SELECT COUNT(*) FROM horses WHERE guild_id = ? AND user_id = ?;",
+                (ctx.guild.id, ctx.author.id),
+            ))[0][0]
+
+            embed.add_field(name="", value=
+            "Welcome to Horser! The horse racing simulation game.\n"
+            "\n"
+            f"{ctx.author.mention}, you have {horse_count} horses in your stable.\n")
+
+        elif code == "stable_menu":
+            embed.color = discord.Color.dark_gold()
+            embed.title = "Stable"
+
+            horse_count = list(self.cursor.execute(
+                "SELECT COUNT(*) FROM horses WHERE guild_id = ? AND user_id = ?;",
+                (ctx.guild.id, ctx.author.id),
+            ))[0][0]
+
+            embed.add_field(name="", value=
+            f"You currently have {horse_count} horses in your stable.\n"
+            "*To manage your horse, type !horser manage [horse name] or use the select menu below.*\n"
+            )
+            
+            horse_idx = 1
+            for horse in self.cursor.execute(
+                "SELECT horse_name, horse_color, energy, max_energy FROM horses WHERE guild_id = ? AND user_id = ?;",
+                (ctx.guild.id, ctx.author.id),
+            ):
+                # add embed which shows the horse emoji with the corresponding color
+                emoji = await self.config.__getattr__(f'emoji_horse_{horse[1]}')()
+                embed.add_field(name=f"{horse_idx}. {horse[0]}", value=emoji, inline=False)
+                embed.add_field(name="", value=f"Energy: {horse[2]}/{horse[3]}\n", inline=False)
+                horse_idx += 1
+
+        elif code == "manage_horse_menu":
+            embed.color = discord.Color.dark_gold()
+            embed.title = "Manage Horse"
+
+            name = args[0]
+
+            # Check if horse exists
+            horse = list(self.cursor.execute(
+                "SELECT horse_color, energy, max_energy, speed, power, stamina, guts, wit, races_run, races_won, cash_earned FROM horses WHERE guild_id = ? AND user_id = ? AND horse_name = ?;",
+                (ctx.guild.id, ctx.author.id, name)
+            ))
+            if not horse:
+                await ctx.send(f"You do not have a horse named '{name}' in your stable.")
+                return
+
+            horse_color, energy, max_energy, speed, power, stamina, guts, wit, races_run, races_won, cash_earned = horse[0]
+            emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
+
+            embed.add_field(name=
+                            f"{emoji} {name}"
+                            , value=
+                            f"Color: **{horse_color.capitalize()}**\n"
+                            f"Energy: **{energy}/{max_energy}**\n"
+                            , inline=False)
+            
+            embed.add_field(name="", value=
+                            f"Speed: **{speed}**‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ \n"
+                            f"Power: **{power}**\n"
+                            f"Stamina: **{stamina}**\n"
+                            f"Guts: **{guts}**\n"
+                            f"Wit: **{wit}**\n"
+                            , inline=True)
+            
+            embed.add_field(name="", value=
+                            f"Races run: **{races_run}**‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ \n"
+                            f"Races won: **{races_won}**\n"
+                            f"Win rate: **{(races_won / races_run * 100) if races_run > 0 else 0:.2f}%**\n"
+                            f"\n"
+                            f"Total cash earned: **{cash_earned}**\n"
+                            , inline=True)
+            
+        elif code == "store_menu":
+            embed.color = discord.Color.dark_green()
+            embed.title = "Store"
+
+            embed.add_field(name="", value= 
+            "Here you can buy horses and training equipment.\n"
+            "\n"
+            f"Your current balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}.\n"
+            "\n"
+            "Store currently under construction.")
+            
+        elif code == "store_menu_buy_horse":
+            embed.color = discord.Color.dark_green()
+            embed.title = "Buy Horse"
+
+            embed.add_field(name="", value= 
+            f" Your current balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}.\n"
+            "\n"
+            f"To buy a horse, type !horser buyHorse [color] [name]. A horse costs {25000} {currency_name}."
+            "\n"
+            "There are currently 20 colors available. Hover over each horse emoji below to see its color name."
+            "\n"
+            f"{await self.config.emoji_horse_aqua()} {await self.config.emoji_horse_ash()} {await self.config.emoji_horse_black()} {await self.config.emoji_horse_blue()}\n"
+            f"{await self.config.emoji_horse_brown()} {await self.config.emoji_horse_chocolate()} {await self.config.emoji_horse_cream()} {await self.config.emoji_horse_diamond()}\n" 
+            f"{await self.config.emoji_horse_green()} {await self.config.emoji_horse_grey()} {await self.config.emoji_horse_lime()} {await self.config.emoji_horse_orange()}\n"
+            f"{await self.config.emoji_horse_pink()} {await self.config.emoji_horse_purple()} {await self.config.emoji_horse_red()} {await self.config.emoji_horse_sky()}\n"
+            f"{await self.config.emoji_horse_soot()} {await self.config.emoji_horse_white()} {await self.config.emoji_horse_yellow()} {await self.config.emoji_horse_zombie()}\n")
+
+        elif code == "race_menu":
+            embed.color = discord.Color.green()
+            embed.title = "Race!"
+
+            embed.add_field(name="", value=
+            f" Race your horses for cash!"
+            "\n"
+            "Race currently under construction.")
+
+        embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
+        return embed
+    
+    ### Energy regeneration logic ###
+    def update_energy(self) -> None:
+        self.cursor.execute(
+            """
+            UPDATE horses
+            SET
+                energy = MIN(
+                max_energy,
+                energy + CAST((strftime('%s','now') - last_energy_regen_ts) / ? AS INTEGER) * ?
+                ),
+                last_energy_regen_ts = last_energy_regen_ts + (
+                CAST((strftime('%s','now') - last_energy_regen_ts) / ? AS INTEGER) * ?
+                )
+            WHERE energy < max_energy;
+            """,
+            (TICK_SECONDS, REGEN_PER_TICK, TICK_SECONDS, TICK_SECONDS),
+        )
+
+    @tasks.loop(seconds=60)
+    async def energy_catchup(self):
+        # Downtime-proof: does nothing unless a full 5-min tick elapsed
+        try:
+            self.bring_energy_current(None)
+        except Exception as e:
+            print(f"[energy_catchup] DB error: {e}")
+
+    @energy_catchup.before_loop
+    async def _before_loop(self):
+        await self.bot.wait_until_ready()
+    ### End energy regeneration logic ###
 
     @commands.command()
     async def horser(self, ctx: commands.Context, cmd: str | None = None, *args) -> None:
@@ -245,160 +401,3 @@ class Horser(commands.Cog):
             name = " ".join(arg.capitalize() for arg in args)
 
             await ctx.send(embed=await self.get_embed(ctx, "manage_horse_menu", name), view=self.ManageHorseMenu(self, ctx))
-    
-
-    async def get_embed(self, ctx: commands.Context, code: str, *args) -> discord.Embed:
-        currency_name = await bank.get_currency_name(ctx.guild)
-
-        embed = discord.Embed()
-
-        if code == "main_menu":
-            embed.color = discord.Color.dark_magenta()
-            embed.title = "Horser"
-
-            horse_count = list(self.cursor.execute(
-                "SELECT COUNT(*) FROM horses WHERE guild_id = ? AND user_id = ?;",
-                (ctx.guild.id, ctx.author.id),
-            ))[0][0]
-
-            embed.add_field(name="", value=
-f"""Welcome to Horser! The horse racing simulation game.
-
-{ctx.author.mention}, you have {horse_count} horses in your stable.""")
-
-        elif code == "stable_menu":
-            embed.color = discord.Color.dark_gold()
-            embed.title = "Stable"
-
-            horse_count = list(self.cursor.execute(
-                "SELECT COUNT(*) FROM horses WHERE guild_id = ? AND user_id = ?;",
-                (ctx.guild.id, ctx.author.id),
-            ))[0][0]
-
-            embed.add_field(name="", value=
-            f"You currently have {horse_count} horses in your stable.\n"
-            "*To manage your horse, type !horser manage [horse name] or use the select menu below.*"
-            )
-            
-            horse_idx = 1
-            for horse in self.cursor.execute(
-                "SELECT horse_name, horse_color, energy, max_energy FROM horses WHERE guild_id = ? AND user_id = ?;",
-                (ctx.guild.id, ctx.author.id),
-            ):
-                # add embed which shows the horse emoji with the corresponding color
-                emoji = await self.config.__getattr__(f'emoji_horse_{horse[1]}')()
-                embed.add_field(name=f"{horse_idx}. {horse[0]}", value=emoji, inline=False)
-                embed.add_field(name="", value=f"Energy: {horse[2]}/{horse[3]}", inline=False)
-                horse_idx += 1
-
-        elif code == "manage_horse_menu":
-            embed.color = discord.Color.dark_gold()
-            embed.title = "Manage Horse"
-
-            name = args[0]
-
-            # Check if horse exists
-            horse = list(self.cursor.execute(
-                "SELECT horse_color, energy, max_energy, speed, power, stamina, guts, wit, races_run, races_won, cash_earned FROM horses WHERE guild_id = ? AND user_id = ? AND horse_name = ?;",
-                (ctx.guild.id, ctx.author.id, name)
-            ))
-            if not horse:
-                await ctx.send(f"You do not have a horse named '{name}' in your stable.")
-                return
-
-            horse_color, energy, max_energy, speed, power, stamina, guts, wit, races_run, races_won, cash_earned = horse[0]
-            emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
-
-            embed.add_field(name=
-                            f"{emoji} {name}"
-                            , value=
-                            f"Color: **{horse_color.capitalize()}**\n"
-                            f"Energy: **{energy}/{max_energy}**\n"
-                            , inline=False)
-            
-            embed.add_field(name="", value=
-                            f"Speed: **{speed}**‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ \n"
-                            f"Power: **{power}**\n"
-                            f"Stamina: **{stamina}**\n"
-                            f"Guts: **{guts}**\n"
-                            f"Wit: **{wit}**\n"
-                            , inline=True)
-            
-            embed.add_field(name="", value=
-                            f"Races run: **{races_run}**‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ \n"
-                            f"Races won: **{races_won}**\n"
-                            f"Win rate: **{(races_won / races_run * 100) if races_run > 0 else 0:.2f}%**\n"
-                            f"\n"
-                            f"Total cash earned: **{cash_earned}**\n"
-                            , inline=True)
-            
-        elif code == "store_menu":
-            embed.color = discord.Color.dark_green()
-            embed.title = "Store"
-
-            embed.add_field(name="", value= 
-f""" Here you can buy horses and training equipment.
-
-Your current balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}.
-
-Store currently under construction.""")
-            
-        elif code == "store_menu_buy_horse":
-            embed.color = discord.Color.dark_green()
-            embed.title = "Buy Horse"
-
-            embed.add_field(name="", value= 
-f""" Your current balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}.
-
-To buy a horse, type !horser buyHorse [color] [name]. A horse costs {25000} {currency_name}.
-
-There are currently 20 colors available. Hover over each horse emoji below to see its color name.
-
-{await self.config.emoji_horse_aqua()} {await self.config.emoji_horse_ash()} {await self.config.emoji_horse_black()} {await self.config.emoji_horse_blue()}
-{await self.config.emoji_horse_brown()} {await self.config.emoji_horse_chocolate()} {await self.config.emoji_horse_cream()} {await self.config.emoji_horse_diamond()} 
-{await self.config.emoji_horse_green()} {await self.config.emoji_horse_grey()} {await self.config.emoji_horse_lime()} {await self.config.emoji_horse_orange()} 
-{await self.config.emoji_horse_pink()} {await self.config.emoji_horse_purple()} {await self.config.emoji_horse_red()} {await self.config.emoji_horse_sky()}
-{await self.config.emoji_horse_soot()} {await self.config.emoji_horse_white()} {await self.config.emoji_horse_yellow()} {await self.config.emoji_horse_zombie()}""")
-
-        elif code == "race_menu":
-            embed.color = discord.Color.green()
-            embed.title = "Race!"
-
-            embed.add_field(name="", value=
-f""" Race your horses for cash!
-
-Race currently under construction.""")
-
-        embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
-        return embed
-    
-    ### Energy regeneration logic ###
-    def update_energy(self) -> None:
-        self.cursor.execute(
-            """
-            UPDATE horses
-            SET
-                energy = MIN(
-                max_energy,
-                energy + CAST((strftime('%s','now') - last_energy_regen_ts) / ? AS INTEGER) * ?
-                ),
-                last_energy_regen_ts = last_energy_regen_ts + (
-                CAST((strftime('%s','now') - last_energy_regen_ts) / ? AS INTEGER) * ?
-                )
-            WHERE energy < max_energy;
-            """,
-            (TICK_SECONDS, REGEN_PER_TICK, TICK_SECONDS, TICK_SECONDS),
-        )
-
-    @tasks.loop(seconds=60)
-    async def energy_catchup(self):
-        # Downtime-proof: does nothing unless a full 5-min tick elapsed
-        try:
-            self.bring_energy_current(None)
-        except Exception as e:
-            print(f"[energy_catchup] DB error: {e}")
-
-    @energy_catchup.before_loop
-    async def _before_loop(self):
-        await self.bot.wait_until_ready()
-    ### End energy regeneration logic ###
