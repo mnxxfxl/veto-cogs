@@ -13,6 +13,7 @@ from redbot.core.utils.chat_formatting import humanize_number
 
 import aiofiles
 import apsw
+from tabulate import tabulate
 
 RequestType = Literal["discord_deleted_user", "owner", "user", "user_strict"]
 
@@ -164,7 +165,7 @@ class Horser(commands.Cog):
         async def race_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             await interaction.response.edit_message(embed=await self.horser.get_race_menu_embed(self.ctx), view=self.horser.RaceMenu(self.horser, self.ctx))
 
-        # add leaderboards
+        # add leaderboard
     
     @horser.command()
     async def stable(self, ctx: commands.Context) -> None:
@@ -453,35 +454,39 @@ class Horser(commands.Cog):
             await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))    
 
     @horser.command()
-    async def leaderboards(self, ctx: commands.Context) -> None:
-        """View the horser leaderboards."""
-        await ctx.send(embed=await self.get_leaderboards_embed(ctx), view=self.LeaderboardsMenu(self, ctx))
+    async def leaderboard(self, ctx: commands.Context) -> None:
+        """View the horser leaderboard."""
+        await ctx.send(embed=await self.get_leaderboard_embed(ctx), view=self.LeaderboardMenu(self, ctx))
 
-    async def get_leaderboards_embed(self, ctx: commands.Context) -> discord.Embed:
+    async def get_leaderboard_embed(self, ctx: commands.Context) -> discord.Embed:
         embed = discord.Embed()
         embed.color = discord.Color.blue()
-        embed.title = "Leaderboards"
+        embed.title = "leaderboard"
 
         # get list of horses ordered by races_won desc
         top_horses = self.cursor.execute(
             """
-            SELECT horse_name, races_won
+            SELECT horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned,
             FROM horses
-            ORDER BY races_won DESC
-            LIMIT 10;
+            ORDER BY cash_earned DESC
+            LIMIT 25;
             """
         )
-        if top_horses:
-            value = "\n".join(f"{name}: {races_won}" for name, races_won in top_horses)
-        else:
-            value = "No horses found."
 
-        embed.add_field(name="", value=value)
+        top_horses = ((await self.config.__getattr__(f'emoji_horse_{horse_color}')() + " " + horse_name, speed, power, stamina, guts, wit, cash_earned) 
+                      for horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in top_horses)
+
+        if top_horses:
+            top_horses = tabulate(top_horses, headers=["Horse", "Speed", "Power", "Stamina", "Guts", "Wit", "Cash Earned"], tablefmt="pretty")
+        else:
+            top_horses = "No horses found."
+
+        embed.add_field(name="", value=top_horses)
 
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
 
-    class LeaderboardsMenu(discord.ui.View):
+    class LeaderboardMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
             super().__init__(timeout=30)
             self.horser = horser
