@@ -408,12 +408,15 @@ class Horser(commands.Cog):
                 return
 
             # Deduct cost and add horse to database
-            await bank.withdraw_credits(ctx.author, horse_cost)
             self.cursor.execute(
                 "INSERT INTO horses (guild_id, user_id, horse_name, horse_color) VALUES (?, ?, ?, ?);",
                 (ctx.guild.id, ctx.author.id, name, color)
             )
-            await ctx.send(f"You have successfully bought a {color} horse named '{name}' for {humanize_number(horse_cost)} {currency_name}!")
+            await bank.withdraw_credits(ctx.author, horse_cost)
+            await ctx.send(
+                f"You have successfully bought a {color} horse named '{name}' for {humanize_number(horse_cost)} {currency_name}!\n"
+                f"Your updated balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}."
+                )
         
         elif cmd.lower() == "manage":
             # Manage horse command
