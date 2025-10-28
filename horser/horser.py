@@ -488,7 +488,7 @@ class Horser(commands.Cog):
         for user_id, horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in query:
             currency_name = await bank.get_currency_name(ctx.guild)
             emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
-            leaderboard += f"**{idx}.** {emoji} **{horse_name}** . . . **{speed}** | **{power}** | **{stamina}** | **{guts}** | **{wit}** . . . {currency_name}**{humanize_number(cash_earned)}** won (<@{user_id}>)\n"
+            leaderboard += f"**{idx}.** {emoji} **{horse_name}** . . . **{speed}** | **{power}** | **{stamina}** | **{guts}** | **{wit}** . . . {currency_name}**{humanize_number(cash_earned)}** won by ⮞<@{user_id}>⮜\n"
             idx += 1
 
         if len(leaderboard) == 0:
