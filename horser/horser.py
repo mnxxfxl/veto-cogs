@@ -139,7 +139,7 @@ class Horser(commands.Cog):
     
     class MainMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
+            super().__init__(timeout=30)
             self.horser = horser
             self.ctx = ctx
 
@@ -186,7 +186,7 @@ class Horser(commands.Cog):
     
     class StableMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
+            super().__init__(timeout=30)
             self.horser = horser
             self.ctx = ctx
 
@@ -242,7 +242,7 @@ class Horser(commands.Cog):
     
     class ManageHorseMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
+            super().__init__(timeout=30)
             self.horser = horser
             self.ctx = ctx
 
@@ -269,7 +269,7 @@ class Horser(commands.Cog):
 
     class StoreMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
+            super().__init__(timeout=30)
             self.horser = horser
             self.ctx = ctx
 
@@ -306,7 +306,7 @@ class Horser(commands.Cog):
 
     class StoreMenuBuyHorse(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
+            super().__init__(timeout=30)
             self.horser = horser
             self.ctx = ctx
 
@@ -331,7 +331,7 @@ class Horser(commands.Cog):
     
     class RaceMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
-            super().__init__(timeout=None)
+            super().__init__(timeout=30)
             self.horser = horser
             self.ctx = ctx
 
