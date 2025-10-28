@@ -458,12 +458,8 @@ class Horser(commands.Cog):
         """View the horser leaderboard."""
         await ctx.send(embed=await self.get_leaderboard_embed(ctx), view=self.LeaderboardMenu(self, ctx))
 
-    async def get_leaderboard_embed(self, ctx: commands.Context) -> discord.Embed:
-        embed = discord.Embed()
-        embed.color = discord.Color.blue()
-        embed.title = "leaderboard"
-
-        # get list of horses ordered by races_won desc
+    async def get_sorted_top_horses(self) -> List[tuple]:
+        # get list of horses ordered by cash_earned desc
         top_horses = self.cursor.execute(
             """
             SELECT horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned
@@ -475,6 +471,15 @@ class Horser(commands.Cog):
 
         top_horses = ((await self.config.__getattr__(f'emoji_horse_{horse_color}')() + " " + horse_name, speed, power, stamina, guts, wit, cash_earned) 
                       for horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in top_horses)
+        
+        return list(top_horses)
+
+    async def get_leaderboard_embed(self, ctx: commands.Context) -> discord.Embed:
+        embed = discord.Embed()
+        embed.color = discord.Color.blue()
+        embed.title = "Leaderboard"
+
+        top_horses = await self.get_sorted_top_horses()
 
         if top_horses:
             top_horses = tabulate(top_horses, headers=["Horse", "Speed", "Power", "Stamina", "Guts", "Wit", "Cash Earned"], tablefmt="pretty")
