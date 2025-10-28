@@ -421,7 +421,7 @@ class Horser(commands.Cog):
     @horser.command()
     async def stable(self, ctx: commands.Context) -> None:
         """View your stable."""
-        user_horses = await self.horser.fetch_user_horses_async()
+        user_horses = await self.fetch_user_horses_async()
         await ctx.send(embed=await self.get_stable_menu_embed(ctx), view=self.StableMenu(self, ctx, user_horses))
 
     @horser.command()
