@@ -59,8 +59,15 @@ class Horser(commands.Cog):
 
             'races_run INTEGER NOT NULL DEFAULT 0,'
             'races_won INTEGER NOT NULL DEFAULT 0'
+            'cash_earned INTEGER NOT NULL DEFAULT 0'
             ');'
         )
+
+    def ensure_cash_earned_column(self) -> None:
+        # Ensure the cash_earned column exists
+        columns = [row[1] for row in self.cursor.execute("PRAGMA table_info(horses);")]
+        if "cash_earned" not in columns:
+            self.cursor.execute("ALTER TABLE horses ADD COLUMN cash_earned INTEGER NOT NULL DEFAULT 0;")
 
     async def red_delete_data_for_user(self, *, requester: RequestType, user_id: int) -> None:
         # TODO: Replace this with the proper end user data removal handling.
@@ -88,7 +95,6 @@ class Horser(commands.Cog):
             super().__init__(timeout=None)
             self.horser = horser
             self.ctx = ctx
-           
 
         @discord.ui.button(label="Stable", style=discord.ButtonStyle.secondary)
         async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -159,6 +165,12 @@ class Horser(commands.Cog):
     @commands.command()
     async def horser(self, ctx: commands.Context, cmd: str | None = None, *args) -> None:
         """Horser main menu."""
+
+        # Ensure tables updated
+        self.ensure_cash_earned_column()
+
+        # Update energy before any command
+        self.update_energy()
 
         if not cmd:
             await ctx.send(embed=await self.get_embed(ctx, "main_menu"), view=self.MainMenu(self, ctx))
@@ -261,14 +273,14 @@ f"""Welcome to Horser! The horse racing simulation game.
 
             # Check if horse exists
             horse = list(self.cursor.execute(
-                "SELECT horse_color, energy, max_energy, speed, power, stamina, guts, wit FROM horses WHERE guild_id = ? AND user_id = ? AND horse_name = ?;",
+                "SELECT horse_color, energy, max_energy, speed, power, stamina, guts, wit, races_run, races_won, cash_earned FROM horses WHERE guild_id = ? AND user_id = ? AND horse_name = ?;",
                 (ctx.guild.id, ctx.author.id, name)
             ))
             if not horse:
                 await ctx.send(f"You do not have a horse named '{name}' in your stable.")
                 return
 
-            horse_color, energy, max_energy, speed, power, stamina, guts, wit = horse[0]
+            horse_color, energy, max_energy, speed, power, stamina, guts, wit, races_run, races_won, cash_earned = horse[0]
             emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
 
             embed.add_field(name=
@@ -287,11 +299,11 @@ f"""Welcome to Horser! The horse racing simulation game.
                             , inline=True)
             
             embed.add_field(name="", value=
-                            f"Races run: **test**‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ \n"
-                            f"Races won: **test**\n"
-                            f"Win rate: **test**\n"
+                            f"Races run: **{races_run}**‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ \n"
+                            f"Races won: **{races_won}**\n"
+                            f"Win rate: **{(races_won / races_run * 100) if races_run > 0 else 0:.2f}%**\n"
                             f"\n"
-                            f"Total cash earned: **test**\n"
+                            f"Total cash earned: **{cash_earned}**\n"
                             , inline=True)
             
         elif code == "store_menu":
