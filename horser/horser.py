@@ -371,59 +371,60 @@ class Horser(commands.Cog):
     ### End energy regeneration logic ###
 
     @commands.command()
-    async def horser(self, ctx: commands.Context, cmd: str | None = None, *args) -> None:
+    async def horser(self, ctx: commands.Context) -> None:
         """Horser main menu."""
 
         # Update energy before any command
         self.update_energy()
 
-        if not cmd:
-            await ctx.send(embed=await self.get_main_menu_embed(ctx), view=self.MainMenu(self, ctx))
+        await ctx.send(embed=await self.get_main_menu_embed(ctx), view=self.MainMenu(self, ctx))
 
-        elif cmd.lower() == "buyhorse":
-            # Buy horse command
-            if len(args) < 2:
-                await ctx.send("Usage: !horser buy_horse [color] [name]")
-                return
+    @commands.command(name="horser buyHorse", aliases=["horser buyhorse"])
+    async def horser_buyhorse(self, ctx: commands.Context, color: str, *name) -> None:
+        """Buy a horse."""
+       
+        if len(color) == 0 or len(name) == 0:
+            await ctx.send("Usage: !horser buy_horse [color] [name]")
+            return
 
-            color = args[0].lower()
-            name = " ".join(arg.capitalize() for arg in args[1:])
+        name = " ".join(arg.capitalize() for arg in name)
 
-            # Check if color is valid
-            valid_colors = [
-                "aqua", "ash", "black", "blue", "brown", "chocolate", "cream",
-                "diamond", "green", "grey", "lime", "orange", "pink", "purple",
-                "red", "sky", "soot", "white", "yellow", "zombie"
-            ]
-            if color not in valid_colors:
-                await ctx.send(f"Invalid color. Valid colors are: {', '.join(valid_colors)}")
-                return
+        # Check if color is valid
+        valid_colors = [
+            "aqua", "ash", "black", "blue", "brown", "chocolate", "cream",
+            "diamond", "green", "grey", "lime", "orange", "pink", "purple",
+            "red", "sky", "soot", "white", "yellow", "zombie"
+        ]
+        if color not in valid_colors:
+            await ctx.send(f"Invalid color. Valid colors are: {', '.join(valid_colors)}")
+            return
 
-            # Check if user has enough balance
-            currency_name = await bank.get_currency_name(ctx.guild)
-            horse_cost = 25000
-            user_balance = await bank.get_balance(ctx.author)
-            if user_balance < horse_cost:
-                await ctx.send(f"You do not have enough {currency_name} to buy a horse. You need {humanize_number(horse_cost)} {currency_name}.")
-                return
+        # Check if user has enough balance
+        currency_name = await bank.get_currency_name(ctx.guild)
+        horse_cost = 25000
+        user_balance = await bank.get_balance(ctx.author)
+        if user_balance < horse_cost:
+            await ctx.send(f"You do not have enough {currency_name} to buy a horse. You need {humanize_number(horse_cost)} {currency_name}.")
+            return
 
-            # Deduct cost and add horse to database
-            self.cursor.execute(
-                "INSERT INTO horses (guild_id, user_id, horse_name, horse_color) VALUES (?, ?, ?, ?);",
-                (ctx.guild.id, ctx.author.id, name, color)
+        # Deduct cost and add horse to database
+        self.cursor.execute(
+            "INSERT INTO horses (guild_id, user_id, horse_name, horse_color) VALUES (?, ?, ?, ?);",
+            (ctx.guild.id, ctx.author.id, name, color)
+        )
+        await bank.withdraw_credits(ctx.author, horse_cost)
+        await ctx.send(
+            f"You have successfully bought a {color} horse named '{name}' for {humanize_number(horse_cost)} {currency_name}!\n"
+            f"Your updated balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}."
             )
-            await bank.withdraw_credits(ctx.author, horse_cost)
-            await ctx.send(
-                f"You have successfully bought a {color} horse named '{name}' for {humanize_number(horse_cost)} {currency_name}!\n"
-                f"Your updated balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}."
-                )
-        
-        elif cmd.lower() == "manage":
-            # Manage horse command
-            if len(args) < 1:
-                await ctx.send("Usage: !horser manage [horse name]")
-                return
 
-            name = " ".join(arg.capitalize() for arg in args)
+    @commands.command(name="horser manage")
+    async def horser_manage(self, ctx: commands.Context, *name) -> None:
+        """Manage a horse."""
+        if len(name) < 1:
+            await ctx.send("Usage: !horser manage [horse name]")
+            return
 
-            await ctx.send(embed=await self.get_manage_horse_menu_embed(ctx, name), view=self.ManageHorseMenu(self, ctx))
+        name = " ".join(n.capitalize() for n in name)
+
+        await ctx.send(embed=await self.get_manage_horse_menu_embed(ctx, name), view=self.ManageHorseMenu(self, ctx))
