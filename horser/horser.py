@@ -279,7 +279,7 @@ f"""Welcome to Horser! The horse racing simulation game.
                             , inline=False)
             
             embed.add_field(name="", value=
-                            f"Speed: **{speed}**_          _\n"
+                            f"Speed: **{speed}**‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ \n"
                             f"Power: **{power}**\n"
                             f"Stamina: **{stamina}**\n"
                             f"Guts: **{guts}**\n"
@@ -287,7 +287,7 @@ f"""Welcome to Horser! The horse racing simulation game.
                             , inline=True)
             
             embed.add_field(name="", value=
-                            f"Races run: **test**_          _\n"
+                            f"Races run: **test**‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ \n"
                             f"Races won: **test**\n"
                             f"Win rate: **test**\n"
                             f"\n"
