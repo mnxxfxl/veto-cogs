@@ -380,10 +380,10 @@ Race currently under construction.""")
             SET
                 energy = MIN(
                 max_energy,
-                energy + CAST((strftime('%s','now') - last_regen_ts) / ? AS INTEGER) * ?
+                energy + CAST((strftime('%s','now') - last_energy_regen_ts) / ? AS INTEGER) * ?
                 ),
-                last_regen_ts = last_regen_ts + (
-                CAST((strftime('%s','now') - last_regen_ts) / ? AS INTEGER) * ?
+                last_energy_regen_ts = last_energy_regen_ts + (
+                CAST((strftime('%s','now') - last_energy_regen_ts) / ? AS INTEGER) * ?
                 )
             WHERE energy < max_energy;
             """,
