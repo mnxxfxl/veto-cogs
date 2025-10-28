@@ -372,7 +372,7 @@ class Horser(commands.Cog):
 
     @commands.group()
     async def horser(self, ctx: commands.Context) -> None:
-        """Horser main group."""
+        """Horser main command. Use !horser menu to bring up the main menu."""
 
         # Update energy before any command
         self.update_energy()
@@ -381,6 +381,22 @@ class Horser(commands.Cog):
     async def menu(self, ctx: commands.Context) -> None:
         """Show the main menu."""
         await ctx.send(embed=await self.get_main_menu_embed(ctx), view=self.MainMenu(self, ctx))
+
+    @horser.command()
+    async def stable(self, ctx: commands.Context) -> None:
+        """View your stable."""
+        await ctx.send(embed=await self.get_stable_menu_embed(ctx), view=self.StableMenu(self, ctx))
+
+    @horser.command()
+    async def manage(self, ctx: commands.Context, *name) -> None:
+        """Manage a horse."""
+        if len(name) < 1:
+            await ctx.send("Usage: !horser manage [horse name]")
+            return
+
+        name = " ".join(n.capitalize() for n in name)
+
+        await ctx.send(embed=await self.get_manage_horse_menu_embed(ctx, name), view=self.ManageHorseMenu(self, ctx))
 
     @horser.command(name="buyHorse", aliases=["buyhorse"])
     async def buyhorse(self, ctx: commands.Context, color: str, *name) -> None:
@@ -420,14 +436,3 @@ class Horser(commands.Cog):
             f"You have successfully bought a {color} horse named '{name}' for {humanize_number(horse_cost)} {currency_name}!\n"
             f"Your updated balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}."
             )
-
-    @horser.command()
-    async def manage(self, ctx: commands.Context, *name) -> None:
-        """Manage a horse."""
-        if len(name) < 1:
-            await ctx.send("Usage: !horser manage [horse name]")
-            return
-
-        name = " ".join(n.capitalize() for n in name)
-
-        await ctx.send(embed=await self.get_manage_horse_menu_embed(ctx, name), view=self.ManageHorseMenu(self, ctx))
