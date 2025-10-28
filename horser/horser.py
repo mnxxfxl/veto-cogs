@@ -458,11 +458,11 @@ class Horser(commands.Cog):
         """View the horser leaderboard."""
         await ctx.send(embed=await self.get_leaderboard_embed(ctx), view=self.LeaderboardMenu(self, ctx))
 
-    async def get_sorted_top_horses(self) -> List[tuple]:
+    async def get_sorted_top_horses(self) -> List[List]:
         # get list of horses ordered by cash_earned desc
 
         cur = self._connection.cursor()
-        top_horses = cur.execute(
+        query = cur.execute(
             """
             SELECT horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned
             FROM horses
@@ -471,10 +471,16 @@ class Horser(commands.Cog):
             """
         )
 
-        top_horses = ((self.config.__getattr__(f'emoji_horse_{horse_color}')() + " " + horse_name, speed, power, stamina, guts, wit, cash_earned) 
-                      for horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in top_horses)
+        # top_horses = ((self.config.__getattr__(f'emoji_horse_{horse_color}')() + " " + horse_name, speed, power, stamina, guts, wit, cash_earned) 
+                    #   for horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in top_horses)
         
-        return list(top_horses)
+        top_horses = []
+
+        for horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in query:
+            emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
+            top_horses.append([f"{emoji} {horse_name}", speed, power, stamina, guts, wit, cash_earned])
+        
+        return top_horses
 
     async def get_leaderboard_embed(self, ctx: commands.Context) -> discord.Embed:
         embed = discord.Embed()
