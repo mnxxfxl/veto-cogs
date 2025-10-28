@@ -464,7 +464,8 @@ class Horser(commands.Cog):
     @horser.command()
     async def leaderboard(self, ctx: commands.Context) -> None:
         """View the horser leaderboard."""
-        await ctx.send(embed=await self.get_leaderboard_embed(ctx), view=self.LeaderboardMenu(self, ctx))
+        await ctx.send(embed=await self.get_leaderboard_embed(ctx), view=self.LeaderboardMenu(self, ctx),
+                       allowed_mentions=discord.AllowedMentions.none())
 
     async def get_leaderboard_embed(self, ctx: commands.Context) -> discord.Embed:
         embed = discord.Embed()
@@ -483,10 +484,12 @@ class Horser(commands.Cog):
         
         leaderboard = ""
 
+        idx = 1
         for user_id, horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in query:
             currency_name = await bank.get_currency_name(ctx.guild)
             emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
-            leaderboard += f"<@\u200b{user_id}>'s {emoji} **{horse_name}** . . . {speed} | {power} | {stamina} | {guts} | {wit} . . . {currency_name}{humanize_number(cash_earned)} won\n"
+            leaderboard += f"**{idx}.** <@{user_id}>'s {emoji} **{horse_name}** . . . **{speed}** | **{power}** | **{stamina}** | **{guts}** | **{wit}** . . . {currency_name}**{humanize_number(cash_earned)}** won\n"
+            idx += 1
 
         if len(leaderboard) == 0:
             leaderboard = "No horses found."
