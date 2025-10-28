@@ -1,5 +1,5 @@
 from os import name
-from typing import Literal
+from typing import Literal, List
 
 import discord
 from discord.ext import tasks
@@ -189,8 +189,72 @@ class Horser(commands.Cog):
             self.horser = horser
             self.ctx = ctx
 
+            options = self._generate_horse_options()
+            self.select = discord.ui.Select(
+                placeholder="Manage a horse",
+                options=options[:25],  # Discord limit
+                min_values=1,
+                max_values=1,
+                custom_id="stable_manage_select"
+            )
+
+            # Disable the select if the only option is "none"
+            if len(options) == 1 and options[0].value == "none":
+                self.select.disabled = True
+
+            async def on_select(interaction: discord.Interaction):
+                await self.manage_horse_select(interaction, self.select.values[0])
+
+            self.select.callback = on_select
+            self.add_item(self.select)
+
+        def _generate_horse_options(self) -> List[discord.SelectOption]:
+            options: List[discord.SelectOption] = []
+            
+            for horse_name, color in self.horser.cursor.execute(
+                "SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;",
+                (self.ctx.guild.id, self.ctx.author.id)
+            ):
+                options.append(
+                    discord.SelectOption(
+                        label=str(horse_name),
+                        value=str(horse_name),
+                        emoji=self.horser.config.__getattr__(f'emoji_horse_{color}')()
+                    )
+                )
+
+            if not options:
+                # Provide a disabled single option
+                options = [discord.SelectOption(label="No horses available", value="none", description="Buy a horse first.")]
+            # Discord limits selects to 25 options
+            return options[:25]
+
+        async def manage_horse_select(self, interaction: discord.Interaction, selected_value: str):
+            # Prevent other users hijacking
+            if interaction.user.id != self.ctx.author.id:
+                await interaction.response.send_message("⛔ This menu isn't yours.", ephemeral=True)
+                return
+
+            if selected_value == "none":
+                await interaction.response.send_message("You have no horses to manage. Please buy a horse first.", ephemeral=True)
+                return
+
+            embed = await self.horser.get_manage_horse_embed(self.ctx, selected_value)
+            view = self.horser.ManageHorseMenu(self.horser, self.ctx)
+            await interaction.response.edit_message(embed=embed, view=view)
+
+        @discord.ui.button(label="Buy Horse", style=discord.ButtonStyle.primary)
+        async def buy_horse_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            if interaction.user.id != self.ctx.author.id:
+                await interaction.response.send_message("⛔ This button isn't yours.", ephemeral=True)
+                return
+            await interaction.response.edit_message(embed=await self.horser.get_buy_horse_embed(self.ctx), view=self.horser.BuyHorseMenu(self.horser, self.ctx))
+
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            if interaction.user.id != self.ctx.author.id:
+                await interaction.response.send_message("⛔ This button isn't yours.", ephemeral=True)
+                return
             await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
 
     async def get_manage_horse_embed(self, ctx: commands.Context, name: str) -> discord.Embed:
