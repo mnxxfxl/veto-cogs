@@ -1,3 +1,4 @@
+from os import name
 from typing import Literal
 
 import discord
@@ -111,6 +112,16 @@ class Horser(commands.Cog):
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "main_menu"), view=self.horser.MainMenu(self.horser, self.ctx))
 
+    class ManageHorseMenu(discord.ui.View):
+        def __init__(self, horser, ctx: commands.Context) -> None:
+            super().__init__(timeout=None)
+            self.horser = horser
+            self.ctx = ctx
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_embed(self.ctx, "stable_menu"), view=self.horser.StableMenu(self.horser, self.ctx))
+
     class StoreMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
             super().__init__(timeout=None)
@@ -195,31 +206,10 @@ class Horser(commands.Cog):
 
             name = " ".join(arg.capitalize() for arg in args)
 
-            # Check if horse exists
-            horse = list(self.cursor.execute(
-                "SELECT horse_color, energy, max_energy, speed, power, stamina, guts, wit FROM horses WHERE guild_id = ? AND user_id = ? AND horse_name = ?;",
-                (ctx.guild.id, ctx.author.id, name)
-            ))
-            if not horse:
-                await ctx.send(f"You do not have a horse named '{name}' in your stable.")
-                return
-
-            horse_color, energy, max_energy, speed, power, stamina, guts, wit = horse[0]
-            emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
-            await ctx.send(
-                f"Managing Horse: {name}\n"
-                f"Color: {horse_color} {emoji}\n"
-                f"Energy: {energy}/{max_energy}\n"
-
-                f"Speed: {speed}\n"
-                f"Power: {power}\n"
-                f"Stamina: {stamina}\n"
-                f"Guts: {guts}\n"
-                f"Wit: {wit}\n"
-            )
+            await ctx.send(embed=await self.get_embed(ctx, "manage_horse_menu", name), view=self.ManageHorseMenu(self, ctx))
     
 
-    async def get_embed(self, ctx: commands.Context, code: str) -> discord.Embed:
+    async def get_embed(self, ctx: commands.Context, code: str, *args) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
 
         embed = discord.Embed()
@@ -263,6 +253,47 @@ f"""Welcome to Horser! The horse racing simulation game.
                 embed.add_field(name="", value=f"Energy: {horse[2]}/{horse[3]}", inline=False)
                 horse_idx += 1
 
+        elif code == "manage_horse_menu":
+            embed.color = discord.Color.dark_gold()
+            embed.title = "Manage Horse"
+
+            name = args[0]
+
+            # Check if horse exists
+            horse = list(self.cursor.execute(
+                "SELECT horse_color, energy, max_energy, speed, power, stamina, guts, wit FROM horses WHERE guild_id = ? AND user_id = ? AND horse_name = ?;",
+                (ctx.guild.id, ctx.author.id, name)
+            ))
+            if not horse:
+                await ctx.send(f"You do not have a horse named '{name}' in your stable.")
+                return
+
+            horse_color, energy, max_energy, speed, power, stamina, guts, wit = horse[0]
+            emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
+
+            embed.add_field(name=
+                            f"{emoji} {name}"
+                            , value=
+                            f"Color: **{horse_color.capitalize()}**\n"
+                            f"Energy: **{energy}/{max_energy}**\n"
+                            , inline=False)
+            
+            embed.add_field(name="", value=
+                            f"Speed: **{speed}**\n"
+                            f"Power: **{power}**\n"
+                            f"Stamina: **{stamina}**\n"
+                            f"Guts: **{guts}**\n"
+                            f"Wit: **{wit}**\n"
+                            , inline=True)
+            
+            embed.add_field(name="", value=
+                            f"Races run: test\n"
+                            f"Races won: test\n"
+                            f"Win rate: test\n"
+                            f"\n"
+                            f"Total cash earned: test\n"
+                            , inline=True)
+            
         elif code == "store_menu":
             embed.color = discord.Color.dark_green()
             embed.title = "Store"
