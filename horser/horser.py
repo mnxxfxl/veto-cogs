@@ -63,9 +63,6 @@ class Horser(commands.Cog):
             ');'
         )
 
-        # Ensure tables updated
-        self.ensure_cash_earned_column()
-
     def ensure_cash_earned_column(self) -> None:
         # Ensure the cash_earned column exists
         columns = [row[1] for row in self.cursor.execute("PRAGMA table_info(horses);")]
@@ -92,6 +89,9 @@ class Horser(commands.Cog):
                 emoji = await self.bot.create_application_emoji(name=emoji_name, image=image)
             if emoji:
                 await self.config.__getattr__("emoji_" + emoji_name).set(str(emoji))
+
+        # Ensure tables updated
+        self.ensure_cash_earned_column()
 
     class MainMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context) -> None:
