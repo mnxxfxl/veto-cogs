@@ -182,14 +182,18 @@ class Horser(commands.Cog):
 
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
-    
+
+    async def fetch_user_horses_async(self) -> List[tuple]:
+        cur = self._connection.cursor()
+        return list(cur.execute("SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;", (self.ctx.guild.id, self.ctx.author.id)))
+
     class StableMenu(discord.ui.View):
-        def __init__(self, horser, ctx: commands.Context) -> None:
+        def __init__(self, horser, ctx: commands.Context, user_horses: List[tuple]) -> None:
             super().__init__(timeout=30)
             self.horser = horser
             self.ctx = ctx
 
-            options = self._generate_horse_options()
+            options = self._generate_horse_options_from_rows(user_horses)
             self.select = discord.ui.Select(
                 placeholder="Manage a horse",
                 options=options[:25],  # Discord limit
@@ -208,13 +212,10 @@ class Horser(commands.Cog):
             self.select.callback = on_select
             self.add_item(self.select)
 
-        def _generate_horse_options(self) -> List[discord.SelectOption]:
+        def _generate_horse_options_from_rows(self, rows: List[tuple]) -> List[discord.SelectOption]:
             options: List[discord.SelectOption] = []
-            
-            for horse_name, color in self.horser.cursor.execute(
-                "SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;",
-                (self.ctx.guild.id, self.ctx.author.id)
-            ):
+
+            for horse_name, color in rows:
                 options.append(
                     discord.SelectOption(
                         label=str(horse_name),
@@ -226,8 +227,8 @@ class Horser(commands.Cog):
             if not options:
                 # Provide a disabled single option
                 options = [discord.SelectOption(label="No horses available", value="none", description="Buy a horse first.")]
-            # Discord limits selects to 25 options
-            return options[:25]
+
+            return options
 
         async def manage_horse_select(self, interaction: discord.Interaction, selected_value: str):
             # Prevent other users hijacking
