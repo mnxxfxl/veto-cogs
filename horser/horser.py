@@ -11,6 +11,7 @@ from redbot.core.data_manager import bundled_data_path, cog_data_path
 from redbot.core.utils.menus import menu
 from redbot.core.utils.chat_formatting import humanize_number
 
+import asyncio
 import aiofiles
 import apsw
 from tabulate import tabulate
@@ -90,6 +91,9 @@ class Horser(commands.Cog):
             ');'
         )
 
+        # energy regeneration loop
+        self.energy_catchup.start()
+
     def ensure_cash_earned_column(self) -> None:
         # Ensure the cash_earned column exists
         columns = [row[1] for row in self.cursor.execute("PRAGMA table_info(horses);")]
@@ -119,6 +123,10 @@ class Horser(commands.Cog):
 
         # Ensure tables updated
         self.ensure_cash_earned_column()
+
+    async def cog_unload(self) -> None:
+        # This method is called when the cog is unloaded.
+        self.energy_catchup.cancel()
 
     @commands.group()
     async def horser(self, ctx: commands.Context) -> None:
@@ -510,7 +518,7 @@ class Horser(commands.Cog):
             await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
 
     ### Energy regeneration logic ###
-    def update_energy(self) -> None:
+    async def update_energy(self) -> None:
         cur = self._connection.cursor()
         cur.execute(
             """
@@ -532,7 +540,7 @@ class Horser(commands.Cog):
     async def energy_catchup(self):
         # Downtime-proof: does nothing unless a full 5-min tick elapsed
         try:
-            self.bring_energy_current(None)
+            self.update_energy()
         except Exception as e:
             print(f"[energy_catchup] DB error: {e}")
 
