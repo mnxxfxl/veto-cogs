@@ -379,7 +379,7 @@ class Horser(commands.Cog):
 
         if ctx.invoked_subcommand is None and ctx.subcommand_passed is None:
             await ctx.send(embed=await self.get_main_menu_embed(ctx), view=self.MainMenu(self, ctx))
-        elif ctx.invoked_subcommand is None and ctx.subcommand_passed is None:
+        elif ctx.invoked_subcommand is None and ctx.subcommand_passed:
             pass
             
 
