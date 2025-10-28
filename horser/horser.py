@@ -279,7 +279,7 @@ f"""Welcome to Horser! The horse racing simulation game.
                             , inline=False)
             
             embed.add_field(name="", value=
-                            f"Speed: **{speed}**\n"
+                            f"Speed: **{speed}**__          __\n"
                             f"Power: **{power}**\n"
                             f"Stamina: **{stamina}**\n"
                             f"Guts: **{guts}**\n"
@@ -287,11 +287,11 @@ f"""Welcome to Horser! The horse racing simulation game.
                             , inline=True)
             
             embed.add_field(name="", value=
-                            f"Races run: test\n"
-                            f"Races won: test\n"
-                            f"Win rate: test\n"
+                            f"Races run: **test**__          __\n"
+                            f"Races won: **test**\n"
+                            f"Win rate: **test**\n"
                             f"\n"
-                            f"Total cash earned: test\n"
+                            f"Total cash earned: **test**\n"
                             , inline=True)
             
         elif code == "store_menu":
