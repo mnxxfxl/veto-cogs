@@ -422,6 +422,11 @@ class Horser(commands.Cog):
             user_horses = await self.horser.fetch_user_horses_async(self.ctx)
             await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx, user_horses))
 
+    @horser.command()
+    async def race(self, ctx: commands.Context) -> None:
+        """Race your horses for glory!"""
+        await ctx.send(embed=await self.get_race_menu_embed(ctx), view=self.RaceMenu(self, ctx))
+
     async def get_race_menu_embed(self, ctx: commands.Context) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
 
@@ -446,6 +451,45 @@ class Horser(commands.Cog):
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))    
+
+    @horser.command()
+    async def leaderboards(self, ctx: commands.Context) -> None:
+        """View the horser leaderboards."""
+        await ctx.send(embed=await self.get_leaderboards_embed(ctx), view=self.LeaderboardsMenu(self, ctx))
+
+    async def get_leaderboards_embed(self, ctx: commands.Context) -> discord.Embed:
+        embed = discord.Embed()
+        embed.color = discord.Color.blue()
+        embed.title = "Leaderboards"
+
+        # get list of horses ordered by races_won desc
+        top_horses = self.cursor.execute(
+            """
+            SELECT horse_name, races_won
+            FROM horses
+            ORDER BY races_won DESC
+            LIMIT 10;
+            """
+        )
+        if top_horses:
+            value = "\n".join(f"{name}: {races_won}" for name, races_won in top_horses)
+        else:
+            value = "No horses found."
+
+        embed.add_field(name="", value=value)
+
+        embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
+        return embed
+
+    class LeaderboardsMenu(discord.ui.View):
+        def __init__(self, horser, ctx: commands.Context) -> None:
+            super().__init__(timeout=30)
+            self.horser = horser
+            self.ctx = ctx
+
+        @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
+        async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+            await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
 
     ### Energy regeneration logic ###
     def update_energy(self) -> None:
