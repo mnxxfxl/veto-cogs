@@ -221,7 +221,7 @@ class Horser(commands.Cog):
                     discord.SelectOption(
                         label=str(horse_name),
                         value=str(horse_name),
-                        emoji=getattr(self.horser.config, f"emoji_horse_{color}", "🐴")
+                        emoji=self.horser.config.emoji_horse_aqua()
                     )
                 )
 
