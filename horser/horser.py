@@ -119,6 +119,18 @@ class Horser(commands.Cog):
         # Ensure tables updated
         self.ensure_cash_earned_column()
 
+    @commands.group()
+    async def horser(self, ctx: commands.Context) -> None:
+        """Horser main command. Use !horser menu to bring up the main menu."""
+
+        # Update energy before any command
+        self.update_energy()
+
+    @horser.command()
+    async def menu(self, ctx: commands.Context) -> None:
+        """Show the main menu."""
+        await ctx.send(embed=await self.get_main_menu_embed(ctx), view=self.MainMenu(self, ctx))
+
     async def get_main_menu_embed(self, ctx: commands.Context) -> discord.Embed:
         embed = discord.Embed()
         embed.color = discord.Color.dark_magenta()
@@ -154,6 +166,12 @@ class Horser(commands.Cog):
 
         # add leaderboards
     
+    @horser.command()
+    async def stable(self, ctx: commands.Context) -> None:
+        """View your stable."""
+        user_horses = await self.fetch_user_horses_async(ctx)
+        await ctx.send(embed=await self.get_stable_menu_embed(ctx), view=self.StableMenu(self, ctx, user_horses))
+
     async def get_stable_menu_embed(self, ctx: commands.Context) -> discord.Embed:
         embed = discord.Embed()
         embed.color = discord.Color.dark_gold()
@@ -185,13 +203,14 @@ class Horser(commands.Cog):
         return embed
 
     async def fetch_user_horses_async(self, ctx) -> List[tuple]:
+        # Fetch user's horses asynchronously in order to avoid database locks
         cur = self._connection.cursor()
         result = list(cur.execute("SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;", (ctx.guild.id, ctx.author.id)))
         result = [(row[0], await self.config.__getattr__(f'emoji_horse_{row[1]}')()) for row in result]
         return result
 
     class StableMenu(discord.ui.View):
-        def __init__(self, horser, ctx: commands.Context, user_horses: List[tuple]) -> None:
+        def __init__(self, horser, ctx: commands.Context, user_horses: List[tuple[str, str]]) -> None:
             super().__init__(timeout=30)
             self.horser = horser
             self.ctx = ctx
@@ -261,6 +280,17 @@ class Horser(commands.Cog):
                 return
             await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
 
+    @horser.command()
+    async def manage(self, ctx: commands.Context, *name) -> None:
+        """Manage a horse."""
+        if len(name) < 1:
+            await ctx.send("Usage: !horser manage [horse name]")
+            return
+
+        name = " ".join(n.capitalize() for n in name)
+
+        await ctx.send(embed=await self.get_manage_horse_embed(ctx, name), view=self.ManageHorseMenu(self, ctx))
+
     async def get_manage_horse_embed(self, ctx: commands.Context, name: str) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
 
@@ -317,6 +347,46 @@ class Horser(commands.Cog):
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
             user_horses = await self.horser.fetch_user_horses_async(self.ctx)
             await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx, user_horses))
+
+
+    @horser.command(name="buyHorse", aliases=["buyhorse"])
+    async def buyhorse(self, ctx: commands.Context, color: str, *name) -> None:
+        """Buy a horse."""
+       
+        if len(color) == 0 or len(name) == 0:
+            await ctx.send("Usage: !horser buy_horse [color] [name]")
+            return
+
+        name = " ".join(arg.capitalize() for arg in name)
+
+        # Check if color is valid
+        valid_colors = [
+            "aqua", "ash", "black", "blue", "brown", "chocolate", "cream",
+            "diamond", "green", "grey", "lime", "orange", "pink", "purple",
+            "red", "sky", "soot", "white", "yellow", "zombie"
+        ]
+        if color not in valid_colors:
+            await ctx.send(f"Invalid color. Valid colors are: {', '.join(valid_colors)}")
+            return
+
+        # Check if user has enough balance
+        currency_name = await bank.get_currency_name(ctx.guild)
+        horse_cost = 25000
+        user_balance = await bank.get_balance(ctx.author)
+        if user_balance < horse_cost:
+            await ctx.send(f"You do not have enough {currency_name} to buy a horse. You need {humanize_number(horse_cost)} {currency_name}.")
+            return
+
+        # Deduct cost and add horse to database
+        self.cursor.execute(
+            "INSERT INTO horses (guild_id, user_id, horse_name, horse_color) VALUES (?, ?, ?, ?);",
+            (ctx.guild.id, ctx.author.id, name, color)
+        )
+        await bank.withdraw_credits(ctx.author, horse_cost)
+        await ctx.send(
+            f"You have successfully bought a {color} horse named '{name}' for {humanize_number(horse_cost)} {currency_name}!\n"
+            f"Your updated balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}."
+            )
 
     async def get_buy_horse_embed(self, ctx: commands.Context) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
@@ -407,71 +477,3 @@ class Horser(commands.Cog):
     async def _before_loop(self):
         await self.bot.wait_until_ready()
     ### End energy regeneration logic ###
-
-    @commands.group()
-    async def horser(self, ctx: commands.Context) -> None:
-        """Horser main command. Use !horser menu to bring up the main menu."""
-
-        # Update energy before any command
-        self.update_energy()
-            
-    @horser.command()
-    async def menu(self, ctx: commands.Context) -> None:
-        """Show the main menu."""
-        await ctx.send(embed=await self.get_main_menu_embed(ctx), view=self.MainMenu(self, ctx))
-
-    @horser.command()
-    async def stable(self, ctx: commands.Context) -> None:
-        """View your stable."""
-        user_horses = await self.fetch_user_horses_async(ctx)
-        await ctx.send(embed=await self.get_stable_menu_embed(ctx), view=self.StableMenu(self, ctx, user_horses))
-
-    @horser.command()
-    async def manage(self, ctx: commands.Context, *name) -> None:
-        """Manage a horse."""
-        if len(name) < 1:
-            await ctx.send("Usage: !horser manage [horse name]")
-            return
-
-        name = " ".join(n.capitalize() for n in name)
-
-        await ctx.send(embed=await self.get_manage_horse_embed(ctx, name), view=self.ManageHorseMenu(self, ctx))
-
-    @horser.command(name="buyHorse", aliases=["buyhorse"])
-    async def buyhorse(self, ctx: commands.Context, color: str, *name) -> None:
-        """Buy a horse."""
-       
-        if len(color) == 0 or len(name) == 0:
-            await ctx.send("Usage: !horser buy_horse [color] [name]")
-            return
-
-        name = " ".join(arg.capitalize() for arg in name)
-
-        # Check if color is valid
-        valid_colors = [
-            "aqua", "ash", "black", "blue", "brown", "chocolate", "cream",
-            "diamond", "green", "grey", "lime", "orange", "pink", "purple",
-            "red", "sky", "soot", "white", "yellow", "zombie"
-        ]
-        if color not in valid_colors:
-            await ctx.send(f"Invalid color. Valid colors are: {', '.join(valid_colors)}")
-            return
-
-        # Check if user has enough balance
-        currency_name = await bank.get_currency_name(ctx.guild)
-        horse_cost = 25000
-        user_balance = await bank.get_balance(ctx.author)
-        if user_balance < horse_cost:
-            await ctx.send(f"You do not have enough {currency_name} to buy a horse. You need {humanize_number(horse_cost)} {currency_name}.")
-            return
-
-        # Deduct cost and add horse to database
-        self.cursor.execute(
-            "INSERT INTO horses (guild_id, user_id, horse_name, horse_color) VALUES (?, ?, ?, ?);",
-            (ctx.guild.id, ctx.author.id, name, color)
-        )
-        await bank.withdraw_credits(ctx.author, horse_cost)
-        await ctx.send(
-            f"You have successfully bought a {color} horse named '{name}' for {humanize_number(horse_cost)} {currency_name}!\n"
-            f"Your updated balance is {humanize_number(await bank.get_balance(ctx.author))} {currency_name}."
-            )
