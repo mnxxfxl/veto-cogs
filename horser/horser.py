@@ -280,13 +280,6 @@ class Horser(commands.Cog):
                 return
             await interaction.response.edit_message(embed=await self.horser.get_main_menu_embed(self.ctx), view=self.horser.MainMenu(self.horser, self.ctx))
 
-        async def on_timeout(self):
-            if self.message:
-                try:
-                    await self.message.edit(view=None)
-                except discord.NotFound:
-                    pass
-
     @horser.command()
     async def manage(self, ctx: commands.Context, *name) -> None:
         """Manage a horse."""
