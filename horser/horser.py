@@ -145,7 +145,8 @@ class Horser(commands.Cog):
 
         @discord.ui.button(label="Stable", style=discord.ButtonStyle.secondary)
         async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx))
+            user_horses = await self.horser.fetch_user_horses_async()
+            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx, user_horses))
 
         @discord.ui.button(label="Race!", style=discord.ButtonStyle.primary)
         async def race_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -312,7 +313,8 @@ class Horser(commands.Cog):
 
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx))
+            user_horses = await self.horser.fetch_user_horses_async()
+            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx, user_horses))
 
     async def get_buy_horse_embed(self, ctx: commands.Context) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
@@ -345,7 +347,8 @@ class Horser(commands.Cog):
 
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx))
+            user_horses = await self.horser.fetch_user_horses_async()
+            await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx, user_horses))
 
     async def get_race_menu_embed(self, ctx: commands.Context) -> discord.Embed:
         currency_name = await bank.get_currency_name(ctx.guild)
@@ -418,7 +421,8 @@ class Horser(commands.Cog):
     @horser.command()
     async def stable(self, ctx: commands.Context) -> None:
         """View your stable."""
-        await ctx.send(embed=await self.get_stable_menu_embed(ctx), view=self.StableMenu(self, ctx))
+        user_horses = await self.horser.fetch_user_horses_async()
+        await ctx.send(embed=await self.get_stable_menu_embed(ctx), view=self.StableMenu(self, ctx, user_horses))
 
     @horser.command()
     async def manage(self, ctx: commands.Context, *name) -> None:
