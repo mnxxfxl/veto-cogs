@@ -502,7 +502,7 @@ class Horser(commands.Cog):
         else:
             top_horses = "No horses found."
 
-        embed.add_field(name="", value=top_horses)
+        embed.add_field(name="", value=f"```{top_horses}```")
 
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
