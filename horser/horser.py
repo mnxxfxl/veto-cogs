@@ -505,7 +505,8 @@ class Horser(commands.Cog):
 
     ### Energy regeneration logic ###
     def update_energy(self) -> None:
-        self.cursor.execute(
+        cur = self._connection.cursor()
+        cur.execute(
             """
             UPDATE horses
             SET
