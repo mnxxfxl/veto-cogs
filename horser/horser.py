@@ -145,7 +145,7 @@ class Horser(commands.Cog):
 
         @discord.ui.button(label="Stable", style=discord.ButtonStyle.secondary)
         async def stable_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            user_horses = await self.horser.fetch_user_horses_async()
+            user_horses = await self.horser.fetch_user_horses_async(self.ctx)
             await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx, user_horses))
 
         @discord.ui.button(label="Race!", style=discord.ButtonStyle.primary)
@@ -184,9 +184,9 @@ class Horser(commands.Cog):
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
 
-    async def fetch_user_horses_async(self) -> List[tuple]:
+    async def fetch_user_horses_async(self, ctx) -> List[tuple]:
         cur = self._connection.cursor()
-        return list(cur.execute("SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;", (self.ctx.guild.id, self.ctx.author.id)))
+        return list(cur.execute("SELECT horse_name, horse_color FROM horses WHERE guild_id = ? AND user_id = ?;", (ctx.guild.id, ctx.author.id)))
 
     class StableMenu(discord.ui.View):
         def __init__(self, horser, ctx: commands.Context, user_horses: List[tuple]) -> None:
@@ -313,7 +313,7 @@ class Horser(commands.Cog):
 
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            user_horses = await self.horser.fetch_user_horses_async()
+            user_horses = await self.horser.fetch_user_horses_async(self.ctx)
             await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx, user_horses))
 
     async def get_buy_horse_embed(self, ctx: commands.Context) -> discord.Embed:
@@ -347,7 +347,7 @@ class Horser(commands.Cog):
 
         @discord.ui.button(label="Back", style=discord.ButtonStyle.secondary)
         async def back_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-            user_horses = await self.horser.fetch_user_horses_async()
+            user_horses = await self.horser.fetch_user_horses_async(self.ctx)
             await interaction.response.edit_message(embed=await self.horser.get_stable_menu_embed(self.ctx), view=self.horser.StableMenu(self.horser, self.ctx, user_horses))
 
     async def get_race_menu_embed(self, ctx: commands.Context) -> discord.Embed:
@@ -421,7 +421,7 @@ class Horser(commands.Cog):
     @horser.command()
     async def stable(self, ctx: commands.Context) -> None:
         """View your stable."""
-        user_horses = await self.fetch_user_horses_async()
+        user_horses = await self.fetch_user_horses_async(ctx)
         await ctx.send(embed=await self.get_stable_menu_embed(ctx), view=self.StableMenu(self, ctx, user_horses))
 
     @horser.command()
