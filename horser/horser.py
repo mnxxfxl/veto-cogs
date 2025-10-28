@@ -466,7 +466,7 @@ class Horser(commands.Cog):
         # get list of horses ordered by races_won desc
         top_horses = self.cursor.execute(
             """
-            SELECT horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned,
+            SELECT horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned
             FROM horses
             ORDER BY cash_earned DESC
             LIMIT 25;
