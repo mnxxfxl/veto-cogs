@@ -460,7 +460,9 @@ class Horser(commands.Cog):
 
     async def get_sorted_top_horses(self) -> List[tuple]:
         # get list of horses ordered by cash_earned desc
-        top_horses = self.cursor.execute(
+
+        cur = self._connection.cursor()
+        top_horses = cur.execute(
             """
             SELECT horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned
             FROM horses
