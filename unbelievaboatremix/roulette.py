@@ -291,7 +291,7 @@ class Roulette(MixinMeta):
             minimum=datetime.timedelta(seconds=30),
             maximum=datetime.timedelta(minutes=5),
             default_unit="seconds",
-        ),
+        ), # type: ignore
     ):
         """Set the time for roulette wheel to start spinning."""
         seconds = time.total_seconds()
