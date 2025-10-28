@@ -474,25 +474,25 @@ class Horser(commands.Cog):
         cur = self._connection.cursor()
         query = cur.execute(
             """
-            SELECT horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned
+            SELECT user_id, horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned
             FROM horses
             ORDER BY cash_earned DESC
-            LIMIT 25;
+            LIMIT 10;
             """
         )
         
-        top_horses = []
+        leaderboard = ""
 
-        for horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in query:
+        for user_id, horse_name, horse_color, speed, power, stamina, guts, wit, cash_earned in query:
+            currency_name = await bank.get_currency_name(ctx.guild)
+            member = ctx.guild.get_member(user_id)
             emoji = await self.config.__getattr__(f'emoji_horse_{horse_color}')()
-            top_horses.append([f"{emoji} {horse_name}", speed, power, stamina, guts, wit, cash_earned])
+            leaderboard += f"{member.display_name}'s {emoji} **{horse_name}** . . . {speed} | {power} | {stamina} | {guts} | {wit} . . . {currency_name}{humanize_number(cash_earned)} won\n"
 
-        if top_horses:
-            top_horses = tabulate(top_horses, headers=["Horse", "Speed", "Power", "Stamina", "Guts", "Wit", "Cash Earned"], tablefmt="pretty")
-        else:
-            top_horses = "No horses found."
+        if len(leaderboard) == 0:
+            leaderboard = "No horses found."
 
-        embed.add_field(name="", value=f"```{top_horses}```")
+        embed.description = leaderboard
 
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         return embed
